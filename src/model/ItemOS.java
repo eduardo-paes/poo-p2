@@ -1,5 +1,6 @@
 package model;
 
+import model.enums.ETipoItem;
 import model.interfaces.IItem;
 
 public class ItemOS {
@@ -12,6 +13,10 @@ public class ItemOS {
 		this.item = item;
 		this.quantidade = quantidade;
 		this.preco = preco;
+	}
+	
+	public ItemOS(IItem item, double quantidade) {
+		this(item, quantidade, item.getPreco());
 	}
 
 	public double getQuantidade() {
@@ -39,8 +44,8 @@ public class ItemOS {
 		return item.toString();
 	}
 	
-	public IItem getItem() {
-		return item;
+	public ETipoItem getTipo() {
+		return item.getTipo();
 	}
 
 }

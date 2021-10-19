@@ -72,7 +72,7 @@ public class OrdemServico {
 	}
 
 	public void addItem(IItem item, int qtde) {
-		addItem(item, qtde, 0);
+		itens.add(new ItemOS(item, qtde));
 	}
 
 	public void removeItem(int index) {
@@ -82,7 +82,7 @@ public class OrdemServico {
 	public double getTotalServicos() {
 		double valor = 0;
 		for (ItemOS item : itens) {
-			if (item.getItem().getTipo() == ETipoItem.SERVICO) {
+			if (item.getTipo() == ETipoItem.SERVICO) {
 				valor += item.getPreco();
 			}
 		}
@@ -92,7 +92,7 @@ public class OrdemServico {
 	public double getTotalPecas() {
 		double valor = 0;
 		for (ItemOS item : itens) {
-			if (item.getItem().getTipo() == ETipoItem.PECA) {
+			if (item.getTipo() == ETipoItem.PECA) {
 				valor += item.getPreco();
 			}
 		}
@@ -100,11 +100,7 @@ public class OrdemServico {
 	}
 
 	public double getTotalOS() {
-		double valor = 0;
-		for (ItemOS item : itens) {
-			valor += item.getPreco();
-		}
-		return valor;
+		return getTotalServicos() + getTotalPecas();
 	}
 
 	public StringBuilder listarOS() {
@@ -127,19 +123,11 @@ public class OrdemServico {
 
 		sb.append("\n\t:: Itens Associados");
 		int i = 1;
-		double valorServicos = 0, valorPecas = 0, valorTotal = 0;
+		double valorServicos = this.getTotalServicos(), valorPecas = this.getTotalPecas(), valorTotal = 0;
 
 		for (ItemOS item : itens) {
-			IItem p = item.getItem();
-
-			if (p.getTipo() == ETipoItem.PECA) {
-				valorPecas += item.getPreco();
-			} else {
-				valorServicos += item.getPreco();
-			}
-
-			sb.append("\n\t\t" + (i++) + ".\tTipo: " + p.getTipo().getName() + "\t| Cód.: " + p.getCodigo()
-					+ "\t| Descrição: " + p.getDescricao() + "\t| Quantidade: " + item.getQuantidade()
+			sb.append("\n\t\t" + (i++) + ".\tTipo: " + item.getTipo().getName() + "\t| Cód.: TODO "
+					+ "\t| Descrição: TODO \t| Quantidade: " + item.getQuantidade()
 					+ "\t| Valor: R$ " + String.format("%.2f", item.getPreco()));
 		}
 

@@ -5,7 +5,7 @@ import model.interfaces.IItem;
 
 public class Item implements IItem {
 
-	private static int contadorCodigo = 1;
+	private static long contadorCodigo = 1;
 	
 	private final ETipoItem tipo;
 	private final long codigo;
