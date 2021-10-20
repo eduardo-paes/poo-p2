@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -46,8 +47,7 @@ public class ClientesView extends JFrame {
 	private JTextField txtNumero;
 	private JTextField txtBairro;
 	private JRadioButton rdbtnPlatinum;
-	@SuppressWarnings("rawtypes")
-	private JComboBox cmbCidade;
+	private JComboBox<String> cmbCidade;
 
 	private void salvarModelo() {
 		int i = tableCliente.getSelectedRow();
@@ -55,20 +55,50 @@ public class ClientesView extends JFrame {
 			return;
 		}
 
-		if (txtCpf.getText().length() == 0) {
-			JOptionPane.showMessageDialog(null, "É necessário preencher os campos...");
-		} else {
-			try {
+		if (txtLogradouro.getText().length() == 0 || txtNumero.getText().length() == 0
+				|| txtBairro.getText().length() == 0 || cmbCidade.getSelectedIndex() == -1) {
+			JOptionPane.showMessageDialog(null,
+					"É necessário preencher os campos Logradouro, Número, Bairro e Cidade.");
+			return;
+		}
 
-				Object[] row = new Object[9];
-				tableModel.addRow(row);
+		if (txtCpf.getText().length() == 0 || txtNome.getText().length() == 0 || txtTelefone.getText().length() == 0) {
+			JOptionPane.showMessageDialog(null, "É necessário preencher os campos CPF, Nome, Telefone.");
+			return;
+		}
 
-				limparFormulario();
-				JOptionPane.showMessageDialog(null, "Salvo com Sucesso");
-			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "Ano deve estar em formato numérico.");
-			}
+		try {
 
+			Object[] row = new Object[10];
+
+			int numero = Integer.parseInt(txtNumero.getText());
+			long cpf = Long.parseLong(txtCpf.getText());
+			long telefone = Long.parseLong(txtTelefone.getText());
+
+			String cidadeSelecionada = cmbCidade.getSelectedItem().toString();
+			String cidadeNome = cidadeSelecionada.substring(0, cidadeSelecionada.indexOf('-') - 1);
+			String uf = cidadeSelecionada.substring(cidadeSelecionada.indexOf('-') + 1);;
+			
+			row[0] = txtNome.getText();
+			row[1] = rdbtnPlatinum.isSelected() ? "Sim" : "Não";
+			row[2] = cpf;
+			row[3] = telefone;
+			row[4] = txtEmail.getText();
+			row[5] = txtLogradouro.getText();
+			row[6] = numero;
+			row[7] = txtBairro.getText();
+			row[8] = cidadeNome;
+			row[9] = uf;
+
+			clienteController.salvaCliente(txtNome.getText(), rdbtnPlatinum.isSelected(), cpf, telefone,
+					txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
+
+			tableModel.addRow(row);
+
+			limparFormulario();
+			JOptionPane.showMessageDialog(null, "Salvo com Sucesso");
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Número, CPF e Telefone devem estar em formato numérico.");
 		}
 	}
 
@@ -110,13 +140,20 @@ public class ClientesView extends JFrame {
 
 	private void preenchimentoInicial() {
 		tableModel = new DefaultTableModel();
-		Object[] column = { "Nome", "Platinum", "CPF", "Telefone", "E-mail", "Logradouro", "Número", "Bairro", "Cidade", "UF" };
+		Object[] column = { "Nome", "Platinum", "CPF", "Telefone", "E-mail", "Logradouro", "Número", "Bairro", "Cidade",
+				"UF" };
 		tableModel.setColumnIdentifiers(column);
+
+		clienteController.listaCidades();
+
+		ArrayList<String> cidades = clienteController.listaCidades();
+		for (String c : cidades) {
+			cmbCidade.addItem(c);
+		}
 
 		tableCliente.setModel(tableModel);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public ClientesView() {
 		setTitle("Controle de Clientes");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,6 +161,9 @@ public class ClientesView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+
+		cmbCidade = new JComboBox<String>();
+		clienteController = new ClienteController();
 
 		JPanel panelHeader = new JPanel();
 
@@ -305,7 +345,6 @@ public class ClientesView extends JFrame {
 		gbc_lblCidade.gridy = 14;
 		panel.add(lblCidade, gbc_lblCidade);
 
-		cmbCidade = new JComboBox();
 		GridBagConstraints gbc_cmbCidade = new GridBagConstraints();
 		gbc_cmbCidade.insets = new Insets(0, 0, 5, 0);
 		gbc_cmbCidade.fill = GridBagConstraints.HORIZONTAL;

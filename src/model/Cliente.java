@@ -1,12 +1,15 @@
 package model;
 
+import java.io.Serializable;
+
 import model.interfaces.ICliente;
 
-public class Cliente extends Pessoa implements ICliente {
+public class Cliente extends Pessoa implements ICliente, Serializable {
 
+	private static final long serialVersionUID = -8910909612926666907L;
 	private boolean platinum;
 
-	public Cliente(int cpf, String nome, long telefone, Endereco endereco) {
+	public Cliente(long cpf, String nome, long telefone, Endereco endereco) {
 		super(cpf, nome, telefone, endereco);
 	}
 

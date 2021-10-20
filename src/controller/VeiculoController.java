@@ -43,6 +43,7 @@ public class VeiculoController {
 	public void salvaVeiculo(String chassi, int ano, String cor, String placa, String nomeModelo, String cpfCliente) {
 		Modelo modelo = new Modelo(nomeModelo);
 		Veiculo veiculo;
+		
 		if (placa.length() == 0) {
 			veiculo = new Veiculo(modelo, chassi, ano, cor);
 		} else {

@@ -1,22 +1,25 @@
 package model;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import model.excepetions.EmailException;
 import model.interfaces.IPessoa;
 
-public class Pessoa implements IPessoa {
+public class Pessoa implements IPessoa, Serializable {
+
+	private static final long serialVersionUID = -1276341976200981578L;
 
 	private final long cpf;
 
 	private String nome;
 	private String email;
 	private long telefone;
-	
+
 	private Endereco endereco;
 
-	public Pessoa(int cpf, String nome, long telefone, Endereco endereco) {
+	public Pessoa(long cpf, String nome, long telefone, Endereco endereco) {
 		this.cpf = cpf;
 		this.nome = nome;
 		this.telefone = telefone;
@@ -25,20 +28,19 @@ public class Pessoa implements IPessoa {
 
 	public void setNome(String nome) {
 		this.nome = nome;
-	}	
+	}
 
 	public void setEmail(String email) {
 		try {
 			Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-	        Matcher matcher = pattern.matcher(email);
-	        
+			Matcher matcher = pattern.matcher(email);
+
 			if (matcher.find()) {
 				this.email = email;
+			} else {
+				throw new EmailException("E-mail inválido.");
 			}
-	        else {
-	        	throw new EmailException("E-mail inválido.");
-	        }
-			
+
 		} catch (EmailException e) {
 			System.out.println(e.getMessage());
 		}
@@ -48,12 +50,11 @@ public class Pessoa implements IPessoa {
 		this.telefone = telefone;
 	}
 
-
 	@Override
 	public long getCpf() {
 		return this.cpf;
 	}
-	
+
 	@Override
 	public String getNome() {
 		return nome;
@@ -63,7 +64,7 @@ public class Pessoa implements IPessoa {
 	public String getEmail() {
 		return this.email;
 	}
-	
+
 	@Override
 	public long getTelefone() {
 		return telefone;
