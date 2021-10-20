@@ -1,12 +1,14 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import model.interfaces.ICliente;
 import model.interfaces.IVeiculo;
 
-public class Veiculo implements IVeiculo {
+public class Veiculo implements IVeiculo, Serializable {
 
+	private static final long serialVersionUID = -7267967937585742939L;
 	private final String chassi;
 	private final int ano;
 
@@ -17,7 +19,7 @@ public class Veiculo implements IVeiculo {
 	private Modelo modelo;
 	private ArrayList<OrdemServico> servicos;
 
-	public Veiculo(String chassi, Modelo modelo, int ano, String cor) {
+	public Veiculo(Modelo modelo, String chassi, int ano, String cor) {
 		this.servicos = new ArrayList<OrdemServico>();
 		this.chassi = chassi;
 		this.modelo = modelo;
@@ -25,8 +27,8 @@ public class Veiculo implements IVeiculo {
 		this.cor = cor;
 	}
 
-	public Veiculo(String chassi, Modelo modelo, int ano, String cor, String placa) {
-		this(chassi, modelo, ano, cor);
+	public Veiculo(Modelo modelo, String chassi, int ano, String cor, String placa) {
+		this(modelo, chassi, ano, cor);
 		this.placa = placa;
 	}
 
@@ -44,7 +46,7 @@ public class Veiculo implements IVeiculo {
 
 	public StringBuilder listarServicos() {
 		StringBuilder sb = new StringBuilder();
-	
+
 		sb.append("\n ::::::::: Histórico de Serviços:");
 		sb.append("\n\t:: Dados do Veículo");
 		sb.append("\n\t\tModelo: " + modelo.getNome());
