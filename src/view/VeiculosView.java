@@ -31,10 +31,10 @@ import controller.VeiculoController;
 public class VeiculosView extends JFrame {
 
 	private static final long serialVersionUID = 201898579411192642L;
-	
+
 	private VeiculoController veiculoController;
 	private DefaultTableModel tableModel;
-	
+
 	private JPanel contentPane;
 	private JTable tableVeiculo;
 	private JTextField txtModelo;
@@ -45,24 +45,26 @@ public class VeiculosView extends JFrame {
 	@SuppressWarnings("rawtypes")
 	private JComboBox cmbProprietario;
 
-	private void salvarVeiculo() {
+	private void salvarModelo() {
 		int i = tableVeiculo.getSelectedRow();
 		if (i >= 0) {
 			return;
 		}
-		
-		if (txtModelo.getText() == "" || txtChassi.getText() == "" || txtCor.getText() == "" || txtAno.getText() == "") {
+
+		if (txtModelo.getText().length() == 0 || txtChassi.getText().length() == 0 || txtCor.getText().length() == 0
+				|| txtAno.getText().length() == 0) {
 			JOptionPane.showMessageDialog(null, "É necessário preencher os campos Modelo, Chassi, Cor e Ano.");
-		} else {			
+		} else {
 			try {
 				int ano = Integer.parseInt(txtAno.getText());
-				
-				String cpfProprietario = ""; 
+
+				String cpfProprietario = "";
 				if (cmbProprietario.getSelectedItem() != null) {
 					cpfProprietario = cmbProprietario.getSelectedItem().toString();
 				}
-				veiculoController.salvaVeiculo(txtChassi.getText(), ano, txtCor.getText(), txtPlaca.getText(), txtModelo.getText(), cpfProprietario);
-				
+				veiculoController.salvaVeiculo(txtChassi.getText(), ano, txtCor.getText(), txtPlaca.getText(),
+						txtModelo.getText(), cpfProprietario);
+
 				Object[] row = new Object[6];
 				row[0] = txtModelo.getText();
 				row[1] = txtChassi.getText();
@@ -71,26 +73,26 @@ public class VeiculosView extends JFrame {
 				row[4] = txtAno.getText();
 				row[5] = cmbProprietario.getSelectedItem();
 				tableModel.addRow(row);
-				
+
 				limparFormulario();
 				JOptionPane.showMessageDialog(null, "Veículo Salvo");
 			} catch (NumberFormatException e) {
 				JOptionPane.showMessageDialog(null, "Ano deve estar em formato numérico.");
 			}
-			
+
 		}
 	}
 
-	private void editarVeiculo() {
+	private void editarModelo() {
 		int i = tableVeiculo.getSelectedRow();
 		if (i >= 0) {
-			String cpfProprietario = ""; 
+			String cpfProprietario = "";
 			if (cmbProprietario.getSelectedItem() != null) {
 				cpfProprietario = cmbProprietario.getSelectedItem().toString();
 			}
-			
+
 			veiculoController.editaVeiculo(i, txtCor.getText(), txtPlaca.getText(), cpfProprietario);
-			
+
 			tableModel.setValueAt(txtCor.getText(), i, 2);
 			tableModel.setValueAt(txtPlaca.getText(), i, 3);
 			tableModel.setValueAt(cmbProprietario.getSelectedItem(), i, 5);
@@ -102,19 +104,11 @@ public class VeiculosView extends JFrame {
 		}
 	}
 
-	private void selecionaLinha() {
+	private void removerModelo() {
 		int i = tableVeiculo.getSelectedRow();
 		if (i >= 0) {
-			txtModelo.setText(tableModel.getValueAt(i, 0).toString());
-			txtChassi.setText(tableModel.getValueAt(i, 1).toString());
-			txtCor.setText(tableModel.getValueAt(i, 2).toString());
-			txtPlaca.setText(tableModel.getValueAt(i, 3).toString());
-			txtAno.setText(tableModel.getValueAt(i, 4).toString());
-			cmbProprietario.setSelectedItem(tableModel.getValueAt(i, 5));
-			
-			txtChassi.setEditable(false);
-			txtAno.setEditable(false);
-			txtModelo.setEditable(false);
+			veiculoController.removerVeiculo(i);
+			tableModel.removeRow(i);
 		}
 	}
 
@@ -126,37 +120,45 @@ public class VeiculosView extends JFrame {
 		txtPlaca.setText("");
 		txtAno.setText("");
 		cmbProprietario.setSelectedIndex(-1);
-		
+
 		txtChassi.setEditable(true);
 		txtAno.setEditable(true);
 		txtModelo.setEditable(true);
-	}
-
-	private void removerVeiculo() {
-		int i = tableVeiculo.getSelectedRow();
-		if (i >= 0) {
-			veiculoController.removerVeiculo(i);
-			tableModel.removeRow(i);
-		}
 	}
 
 	private void voltarMenu() {
 		this.dispose();
 	}
 
+	private void selecionaLinha() {
+		int i = tableVeiculo.getSelectedRow();
+		if (i >= 0) {
+			txtModelo.setText(tableModel.getValueAt(i, 0).toString());
+			txtChassi.setText(tableModel.getValueAt(i, 1).toString());
+			txtCor.setText(tableModel.getValueAt(i, 2).toString());
+			txtPlaca.setText(tableModel.getValueAt(i, 3).toString());
+			txtAno.setText(tableModel.getValueAt(i, 4).toString());
+			cmbProprietario.setSelectedItem(tableModel.getValueAt(i, 5));
+
+			txtChassi.setEditable(false);
+			txtAno.setEditable(false);
+			txtModelo.setEditable(false);
+		}
+	}
+
 	private void preenchimentoInicial() {
 		tableModel = new DefaultTableModel();
 		Object[] column = { "Modelo", "Chassi", "Cor", "Placa", "Ano", "Proprietário" };
 		tableModel.setColumnIdentifiers(column);
-		
+
 		for (Object[] row : veiculoController.listarVeiculos()) {
 			System.out.println(row.toString());
 			tableModel.addRow(row);
 		}
-		
+
 		tableVeiculo.setModel(tableModel);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public VeiculosView() {
 		setTitle("Controle de Ve\u00EDculos");
@@ -166,8 +168,8 @@ public class VeiculosView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		
-		veiculoController = new VeiculoController();			
+
+		veiculoController = new VeiculoController();
 
 		JPanel panelHeader = new JPanel();
 		JPanel panelBody = new JPanel();
@@ -376,7 +378,7 @@ public class VeiculosView extends JFrame {
 		btnSalvar.setForeground(Color.BLACK);
 		btnSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				salvarVeiculo();
+				salvarModelo();
 			}
 		});
 		GridBagConstraints gbc_btnSalvar = new GridBagConstraints();
@@ -389,7 +391,7 @@ public class VeiculosView extends JFrame {
 		JButton btnRemover = new JButton("Remover");
 		btnRemover.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				removerVeiculo();
+				removerModelo();
 			}
 		});
 		btnRemover.setForeground(Color.BLACK);
@@ -404,7 +406,7 @@ public class VeiculosView extends JFrame {
 		JButton btnEditar = new JButton("Editar");
 		btnEditar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				editarVeiculo();
+				editarModelo();
 			}
 		});
 		btnEditar.setBackground(Color.WHITE);

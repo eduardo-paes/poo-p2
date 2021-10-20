@@ -3,6 +3,9 @@ package view;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -10,12 +13,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 public class MenuView extends JFrame {
-	
+
 	private static final long serialVersionUID = 517294119658988912L;
 
 	private JPanel contentPane;
@@ -25,6 +27,19 @@ public class MenuView extends JFrame {
 			public void run() {
 				try {
 					VeiculosView frame = new VeiculosView();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	private void openControleClientes() {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					ClientesView frame = new ClientesView();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -76,9 +91,6 @@ public class MenuView extends JFrame {
 		this.dispose();
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public MenuView() {
 		// INICIALIZACAO
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -86,53 +98,12 @@ public class MenuView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-
-		SpringLayout springContentPane = new SpringLayout();
-
-		// VEICULOS
-		JButton btnControleVeiculos = new JButton("Controle de Ve\u00EDculos");
-		btnControleVeiculos.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				openControleVeiculos();
-			}
-		});
-		springContentPane.putConstraint(SpringLayout.NORTH, btnControleVeiculos, 134, SpringLayout.NORTH, contentPane);
-		springContentPane.putConstraint(SpringLayout.WEST, btnControleVeiculos, 10, SpringLayout.WEST, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, btnControleVeiculos, -12, SpringLayout.EAST, contentPane);
-		btnControleVeiculos.setPreferredSize(new Dimension(400, 40));
-		contentPane.add(btnControleVeiculos);
-
-		// FUNCIONARIOS
-		JButton btnControleFuncionarios = new JButton("Controle de Funcion\u00E1rios");
-		btnControleFuncionarios.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				openControleFuncionarios();
-			}
-		});
-		springContentPane.putConstraint(SpringLayout.SOUTH, btnControleVeiculos, -29, SpringLayout.NORTH,
-				btnControleFuncionarios);
-		springContentPane.putConstraint(SpringLayout.NORTH, btnControleFuncionarios, 198, SpringLayout.NORTH,
-				contentPane);
-		springContentPane.putConstraint(SpringLayout.WEST, btnControleFuncionarios, 10, SpringLayout.WEST, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, btnControleFuncionarios, -12, SpringLayout.EAST,
-				contentPane);
-		btnControleFuncionarios.setPreferredSize(new Dimension(400, 40));
-		contentPane.add(btnControleFuncionarios);
-
-		// ITENS
-		JButton btnControleItens = new JButton("Controle de Itens");
-		btnControleItens.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				openControleItens();
-			}
-		});
-		springContentPane.putConstraint(SpringLayout.SOUTH, btnControleFuncionarios, -26, SpringLayout.NORTH,
-				btnControleItens);
-		springContentPane.putConstraint(SpringLayout.WEST, btnControleItens, 10, SpringLayout.WEST, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, btnControleItens, -12, SpringLayout.EAST, contentPane);
-		springContentPane.putConstraint(SpringLayout.NORTH, btnControleItens, 264, SpringLayout.NORTH, contentPane);
-		btnControleItens.setPreferredSize(new Dimension(400, 40));
-		contentPane.add(btnControleItens);
+		GridBagLayout gbl_contentPane = new GridBagLayout();
+		gbl_contentPane.columnWidths = new int[] { 402, 0 };
+		gbl_contentPane.rowHeights = new int[] { 35, 92, 35, 35, 45, 40, 40, 35, 0 };
+		gbl_contentPane.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE };
+		contentPane.setLayout(gbl_contentPane);
 
 		// SERVICOS
 		JButton btnControleServicos = new JButton("Controle de Servi\u00E7os");
@@ -141,13 +112,83 @@ public class MenuView extends JFrame {
 				openControleServicos();
 			}
 		});
-		springContentPane.putConstraint(SpringLayout.WEST, btnControleServicos, 10, SpringLayout.WEST, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, btnControleServicos, -12, SpringLayout.EAST, contentPane);
-		springContentPane.putConstraint(SpringLayout.SOUTH, btnControleItens, -20, SpringLayout.NORTH,
-				btnControleServicos);
-		springContentPane.putConstraint(SpringLayout.NORTH, btnControleServicos, 324, SpringLayout.NORTH, contentPane);
+
+		// VEICULOS
+		JButton btnControleVeiculos = new JButton("Controle de Ve\u00EDculos");
+		btnControleVeiculos.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				openControleVeiculos();
+			}
+		});
+
+		// TITULO
+		JLabel lblTitulo = new JLabel("Menu de Controle da Empresa", SwingConstants.CENTER);
+		lblTitulo.setFont(new Font("Calibri", Font.BOLD, 24));
+		lblTitulo.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_lblTitulo = new GridBagConstraints();
+		gbc_lblTitulo.fill = GridBagConstraints.BOTH;
+		gbc_lblTitulo.insets = new Insets(0, 0, 5, 0);
+		gbc_lblTitulo.gridx = 0;
+		gbc_lblTitulo.gridy = 0;
+		contentPane.add(lblTitulo, gbc_lblTitulo);
+		btnControleVeiculos.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_btnControleVeiculos = new GridBagConstraints();
+		gbc_btnControleVeiculos.fill = GridBagConstraints.BOTH;
+		gbc_btnControleVeiculos.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleVeiculos.gridx = 0;
+		gbc_btnControleVeiculos.gridy = 2;
+		contentPane.add(btnControleVeiculos, gbc_btnControleVeiculos);
+
+		JButton btnControleClientes = new JButton("Controle de Clientes");
+		btnControleClientes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				openControleClientes();
+			}
+		});
+		btnControleClientes.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_btnControleClientes = new GridBagConstraints();
+		gbc_btnControleClientes.fill = GridBagConstraints.BOTH;
+		gbc_btnControleClientes.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleClientes.gridx = 0;
+		gbc_btnControleClientes.gridy = 3;
+		contentPane.add(btnControleClientes, gbc_btnControleClientes);
+
+		// FUNCIONARIOS
+		JButton btnControleFuncionarios = new JButton("Controle de Funcion\u00E1rios");
+		btnControleFuncionarios.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openControleFuncionarios();
+			}
+		});
+		btnControleFuncionarios.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_btnControleFuncionarios = new GridBagConstraints();
+		gbc_btnControleFuncionarios.fill = GridBagConstraints.BOTH;
+		gbc_btnControleFuncionarios.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleFuncionarios.gridx = 0;
+		gbc_btnControleFuncionarios.gridy = 4;
+		contentPane.add(btnControleFuncionarios, gbc_btnControleFuncionarios);
+
+		// ITENS
+		JButton btnControleItens = new JButton("Controle de Itens");
+		btnControleItens.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openControleItens();
+			}
+		});
+		btnControleItens.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_btnControleItens = new GridBagConstraints();
+		gbc_btnControleItens.fill = GridBagConstraints.BOTH;
+		gbc_btnControleItens.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleItens.gridx = 0;
+		gbc_btnControleItens.gridy = 5;
+		contentPane.add(btnControleItens, gbc_btnControleItens);
 		btnControleServicos.setPreferredSize(new Dimension(400, 40));
-		contentPane.add(btnControleServicos);
+		GridBagConstraints gbc_btnControleServicos = new GridBagConstraints();
+		gbc_btnControleServicos.fill = GridBagConstraints.BOTH;
+		gbc_btnControleServicos.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleServicos.gridx = 0;
+		gbc_btnControleServicos.gridy = 6;
+		contentPane.add(btnControleServicos, gbc_btnControleServicos);
 
 		// SAIR
 		JButton btnSair = new JButton("Sair");
@@ -156,24 +197,11 @@ public class MenuView extends JFrame {
 				sairMenu();
 			}
 		});
-		springContentPane.putConstraint(SpringLayout.NORTH, btnSair, 387, SpringLayout.NORTH, contentPane);
-		springContentPane.putConstraint(SpringLayout.WEST, btnSair, 10, SpringLayout.WEST, contentPane);
-		springContentPane.putConstraint(SpringLayout.SOUTH, btnSair, -24, SpringLayout.SOUTH, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, btnSair, -12, SpringLayout.EAST, contentPane);
-		springContentPane.putConstraint(SpringLayout.SOUTH, btnControleServicos, -23, SpringLayout.NORTH, btnSair);
 		btnSair.setPreferredSize(new Dimension(400, 40));
-		contentPane.add(btnSair);
-
-		// TITULO
-		JLabel lblTitulo = new JLabel("Menu de Controle da Empresa", SwingConstants.CENTER);
-		springContentPane.putConstraint(SpringLayout.WEST, lblTitulo, 0, SpringLayout.WEST, btnControleVeiculos);
-		springContentPane.putConstraint(SpringLayout.SOUTH, lblTitulo, 70, SpringLayout.NORTH, contentPane);
-		springContentPane.putConstraint(SpringLayout.EAST, lblTitulo, 0, SpringLayout.EAST, btnControleVeiculos);
-		lblTitulo.setFont(new Font("Calibri", Font.BOLD, 24));
-		lblTitulo.setPreferredSize(new Dimension(400, 40));
-		springContentPane.putConstraint(SpringLayout.NORTH, lblTitulo, 30, SpringLayout.NORTH, contentPane);
-		contentPane.add(lblTitulo);
-
-		contentPane.setLayout(springContentPane);
+		GridBagConstraints gbc_btnSair = new GridBagConstraints();
+		gbc_btnSair.fill = GridBagConstraints.BOTH;
+		gbc_btnSair.gridx = 0;
+		gbc_btnSair.gridy = 7;
+		contentPane.add(btnSair, gbc_btnSair);
 	}
 }
