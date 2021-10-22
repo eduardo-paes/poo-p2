@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -28,13 +30,16 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import controller.CidadeController;
 import controller.ClienteController;
+import model.excepetions.EmailException;
 
 public class ClientesView extends JFrame {
 
 	private static final long serialVersionUID = 1282426518432472265L;
 
 	private ClienteController clienteController;
+	private CidadeController cidadeController;
 	private DefaultTableModel tableModel;
 
 	private JPanel contentPane;
@@ -48,6 +53,7 @@ public class ClientesView extends JFrame {
 	private JTextField txtBairro;
 	private JRadioButton rdbtnPlatinum;
 	private JComboBox<String> cmbCidade;
+	private ArrayList<String> cidades;
 
 	private void salvarModelo() {
 		int i = tableCliente.getSelectedRow();
@@ -77,8 +83,15 @@ public class ClientesView extends JFrame {
 
 			String cidadeSelecionada = cmbCidade.getSelectedItem().toString();
 			String cidadeNome = cidadeSelecionada.substring(0, cidadeSelecionada.indexOf('-') - 1);
-			String uf = cidadeSelecionada.substring(cidadeSelecionada.indexOf('-') + 1);;
-			
+			String uf = cidadeSelecionada.substring(cidadeSelecionada.indexOf('-') + 2);
+
+			Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+			Matcher matcher = pattern.matcher(txtEmail.getText());
+
+			if (!matcher.find()) {
+				throw new EmailException("E-mail inválido.");
+			}
+
 			row[0] = txtNome.getText();
 			row[1] = rdbtnPlatinum.isSelected() ? "Sim" : "Não";
 			row[2] = cpf;
@@ -97,6 +110,8 @@ public class ClientesView extends JFrame {
 
 			limparFormulario();
 			JOptionPane.showMessageDialog(null, "Salvo com Sucesso");
+		} catch (EmailException e) {
+			JOptionPane.showMessageDialog(null, "Formatação inválida de e-mail.");
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(null, "Número, CPF e Telefone devem estar em formato numérico.");
 		}
@@ -106,8 +121,43 @@ public class ClientesView extends JFrame {
 		int i = tableCliente.getSelectedRow();
 		if (i >= 0) {
 
-			limparFormulario();
-			JOptionPane.showMessageDialog(null, "Editado com Sucesso");
+			try {
+				long telefone = Long.parseLong(txtTelefone.getText());
+				int numero = Integer.parseInt(txtNumero.getText());
+
+				String cidadeSelecionada = cmbCidade.getSelectedItem().toString();
+				String cidadeNome = cidadeSelecionada.substring(0, cidadeSelecionada.indexOf('-') - 1);
+				String uf = cidadeSelecionada.substring(cidadeSelecionada.indexOf('-') + 2);
+
+				Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+						Pattern.CASE_INSENSITIVE);
+				Matcher matcher = pattern.matcher(txtEmail.getText());
+
+				if (!matcher.find()) {
+					throw new EmailException("E-mail inválido.");
+				}
+
+				clienteController.editaCliente(i, txtNome.getText(), rdbtnPlatinum.isSelected(), telefone,
+						txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
+
+				tableModel.setValueAt(txtNome.getText(), i, 0);
+				tableModel.setValueAt(rdbtnPlatinum.isSelected() ? "Sim" : "Não", i, 1);
+				tableModel.setValueAt(txtTelefone.getText(), i, 3);
+				tableModel.setValueAt(txtEmail.getText(), i, 4);
+				tableModel.setValueAt(txtLogradouro.getText(), i, 5);
+				tableModel.setValueAt(txtNumero.getText(), i, 6);
+				tableModel.setValueAt(txtBairro.getText(), i, 7);
+				tableModel.setValueAt(cidadeNome, i, 8);
+				tableModel.setValueAt(uf, i, 9);
+
+				limparFormulario();
+				JOptionPane.showMessageDialog(null, "Editado com Sucesso");
+
+			} catch (EmailException e) {
+				JOptionPane.showMessageDialog(null, "Formatação inválida de e-mail.");
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "Número e Telefone devem estar em formato numérico.");
+			}
 		} else {
 			JOptionPane.showMessageDialog(null, "É necessário selecionar uma linha");
 		}
@@ -124,6 +174,17 @@ public class ClientesView extends JFrame {
 	private void limparFormulario() {
 		tableCliente.clearSelection();
 
+		txtNome.setText("");
+		txtCpf.setText("");
+		txtTelefone.setText("");
+		txtEmail.setText("");
+		txtLogradouro.setText("");
+		txtNumero.setText("");
+		txtBairro.setText("");
+		rdbtnPlatinum.setSelected(false);
+		cmbCidade.setSelectedIndex(-1);
+
+		txtCpf.setEditable(true);
 	}
 
 	private void voltarMenu() {
@@ -135,6 +196,32 @@ public class ClientesView extends JFrame {
 
 		if (i >= 0) {
 
+			txtNome.setText(tableModel.getValueAt(i, 0).toString());
+			rdbtnPlatinum.setSelected(tableModel.getValueAt(i, 1).toString() == "Sim");
+			txtCpf.setText(tableModel.getValueAt(i, 2).toString());
+			txtTelefone.setText(tableModel.getValueAt(i, 3).toString());
+
+			if (tableModel.getValueAt(i, 4) != null) {
+				txtEmail.setText(tableModel.getValueAt(i, 4).toString());
+			}
+
+			txtLogradouro.setText(tableModel.getValueAt(i, 5).toString());
+			txtNumero.setText(tableModel.getValueAt(i, 6).toString());
+			txtBairro.setText(tableModel.getValueAt(i, 7).toString());
+
+			String cidade = String.format("%s - %s", tableModel.getValueAt(i, 8).toString(),
+					tableModel.getValueAt(i, 9).toString());
+			int index = 0;
+			for (String c : cidades) {
+				if (c.equals(cidade)) {
+					System.out.println(index);
+					cmbCidade.setSelectedIndex(index);
+					break;
+				}
+				index++;
+			}
+
+			txtCpf.setEditable(false);
 		}
 	}
 
@@ -144,9 +231,12 @@ public class ClientesView extends JFrame {
 				"UF" };
 		tableModel.setColumnIdentifiers(column);
 
-		clienteController.listaCidades();
+		ArrayList<Object[]> rows = clienteController.listarClientes();
+		for (Object[] row : rows) {
+			tableModel.addRow(row);
+		}
 
-		ArrayList<String> cidades = clienteController.listaCidades();
+		cidades = cidadeController.listaCidades();
 		for (String c : cidades) {
 			cmbCidade.addItem(c);
 		}

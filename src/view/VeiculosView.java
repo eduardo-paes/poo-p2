@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -26,6 +27,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import controller.ClienteController;
 import controller.VeiculoController;
 
 public class VeiculosView extends JFrame {
@@ -33,7 +35,9 @@ public class VeiculosView extends JFrame {
 	private static final long serialVersionUID = 201898579411192642L;
 
 	private VeiculoController veiculoController;
+	private ClienteController clienteController;
 	private DefaultTableModel tableModel;
+	private Map<Long, String> proprietarios;
 
 	private JPanel contentPane;
 	private JTable tableVeiculo;
@@ -42,8 +46,7 @@ public class VeiculosView extends JFrame {
 	private JTextField txtCor;
 	private JTextField txtPlaca;
 	private JTextField txtAno;
-	@SuppressWarnings("rawtypes")
-	private JComboBox cmbProprietario;
+	private JComboBox<String> cmbProprietario;
 
 	private void salvarModelo() {
 		int i = tableVeiculo.getSelectedRow();
@@ -150,16 +153,24 @@ public class VeiculosView extends JFrame {
 		tableModel = new DefaultTableModel();
 		Object[] column = { "Modelo", "Chassi", "Cor", "Placa", "Ano", "Proprietário" };
 		tableModel.setColumnIdentifiers(column);
+		
+		clienteController = new ClienteController();
+		proprietarios = clienteController.listarProprietarios();
+		cmbProprietario = new JComboBox<String>();
+		
+		for (Map.Entry<Long, String> entry : proprietarios.entrySet()) {
+			String proprietario = entry.getValue().toString();
+			System.out.println(proprietario);
+			cmbProprietario.addItem(proprietario);
+		}
 
 		for (Object[] row : veiculoController.listarVeiculos()) {
-			System.out.println(row.toString());
 			tableModel.addRow(row);
 		}
 
 		tableVeiculo.setModel(tableModel);
 	}
 
-	@SuppressWarnings("rawtypes")
 	public VeiculosView() {
 		setTitle("Controle de Ve\u00EDculos");
 		// INICIALIZACAO
@@ -348,8 +359,7 @@ public class VeiculosView extends JFrame {
 		gbc_lblNewLabel_5.gridx = 0;
 		gbc_lblNewLabel_5.gridy = 6;
 		panel.add(lblNewLabel_5, gbc_lblNewLabel_5);
-
-		cmbProprietario = new JComboBox();
+		
 		GridBagConstraints gbc_cmbProprietario = new GridBagConstraints();
 		gbc_cmbProprietario.insets = new Insets(0, 0, 5, 0);
 		gbc_cmbProprietario.gridwidth = 2;

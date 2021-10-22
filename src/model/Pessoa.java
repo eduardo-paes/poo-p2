@@ -10,7 +10,6 @@ import model.interfaces.IPessoa;
 public class Pessoa implements IPessoa, Serializable {
 
 	private static final long serialVersionUID = -1276341976200981578L;
-
 	private final long cpf;
 
 	private String nome;
@@ -42,7 +41,7 @@ public class Pessoa implements IPessoa, Serializable {
 			}
 
 		} catch (EmailException e) {
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 		}
 	}
 

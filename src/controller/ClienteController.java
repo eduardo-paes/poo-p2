@@ -1,47 +1,60 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import model.Cidade;
 import model.Cliente;
 import model.Endereco;
-import persistence.CidadePersistence;
 import persistence.ClientePersistence;
 
 public class ClienteController {
 	private ArrayList<Cliente> clientes;
-	private ArrayList<Cidade> cidades;
 	private ClientePersistence clientePersistence;
-	private CidadePersistence cidadePersistence;
 
 	public ClienteController() {
 		clientes = new ArrayList<Cliente>();
-		cidades = new ArrayList<Cidade>();
-
 		clientePersistence = new ClientePersistence();
-		cidadePersistence = new CidadePersistence();
-
 		clientes = clientePersistence.extraiDadosArquivo();
-		cidades = cidadePersistence.extraiDadosArquivo();
 	}
 
-	public ArrayList<Object[]> listarVeiculos() {
+	public ArrayList<Object[]> listarClientes() {
 
 		ArrayList<Object[]> rows = new ArrayList<Object[]>();
 
+		for (Cliente v : clientes) {
+			Object[] row = new Object[10];
+			row[0] = v.getNome();
+			row[1] = v.isPlatinum() ? "Sim" : "Não";
+			row[2] = v.getCpf();
+			row[3] = v.getTelefone();
+			row[4] = v.getEmail();
+			row[5] = v.getEndereco().getLogradouro();
+			row[6] = v.getEndereco().getNumero();
+			row[7] = v.getEndereco().getBairro();
+			row[8] = v.getEndereco().getCidade().getNome();
+			row[9] = v.getEndereco().getCidade().getUf();
+			rows.add(row);
+		}
+
 		return rows;
+	}
+
+	public Map<Long, String> listarProprietarios() {
+		Map<Long, String> proprietarios = new LinkedHashMap<Long, String>();
+
+		for (Cliente c : clientes) {
+			proprietarios.put(c.getCpf(), c.getNome());
+		}
+
+		return proprietarios;
 	}
 
 	public void salvaCliente(String nome, boolean isPlatinum, long cpf, long telefone, String email, String logradouro,
 			int numero, String bairro, String nomeCidade, String uf) {
 
-		Cidade cidade = null;
-		for (Cidade c : cidades) {
-			if (c.getNome() == nomeCidade && c.getUf() == uf) {
-				cidade = c;
-				break;
-			}
-		}
+		Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
 
 		if (cidade != null) {
 			Endereco endereco = new Endereco(logradouro, numero, bairro, cidade);
@@ -58,7 +71,7 @@ public class ClienteController {
 	}
 
 	public void editaCliente(int id, String nome, boolean isPlatinum, long telefone, String email, String logradouro,
-			int numero, String bairro) {
+			int numero, String bairro, String nomeCidade, String uf) {
 
 		if (id >= 0 && id <= clientes.size()) {
 			Cliente cliente = clientes.get(id);
@@ -89,22 +102,18 @@ public class ClienteController {
 				cliente.getEndereco().setNumero(numero);
 			}
 
+			Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
+			cliente.getEndereco().setCidade(cidade);
+
 			clientePersistence.salvaDadosArquivo(clientes);
 		}
 	}
 
 	public void removeCliente(int id) {
-
-	}
-
-	public ArrayList<String> listaCidades() {
-		ArrayList<String> cidadeUfs = new ArrayList<String>();
-
-		for (Cidade c : cidades) {
-			cidadeUfs.add(String.format("%s - %s", c.getNome(), c.getUf()));
+		if (id >= 0 && id <= clientes.size()) {
+			clientes.remove(id);
+			clientePersistence.salvaDadosArquivo(clientes);
 		}
-
-		return cidadeUfs;
 	}
 
 }
