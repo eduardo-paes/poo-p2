@@ -246,7 +246,7 @@ public class ClientesView extends JFrame {
 
 	public ClientesView() {
 		setTitle("Controle de Clientes");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1000, 580);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -254,6 +254,7 @@ public class ClientesView extends JFrame {
 
 		cmbCidade = new JComboBox<String>();
 		clienteController = new ClienteController();
+		cidadeController = new CidadeController();
 
 		JPanel panelHeader = new JPanel();
 

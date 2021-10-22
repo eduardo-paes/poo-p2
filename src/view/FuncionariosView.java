@@ -30,12 +30,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import controller.CidadeController;
+import controller.FuncionarioController;
 import model.excepetions.EmailException;
 
 public class FuncionariosView extends JFrame {
 
 	private static final long serialVersionUID = 5271393556968559860L;
 	private CidadeController cidadeController;
+	private FuncionarioController funcionarioController;
 	private DefaultTableModel tableModel;
 
 	private JPanel contentPane;
@@ -49,6 +51,11 @@ public class FuncionariosView extends JFrame {
 	private JTextField txtBairro;
 	private JComboBox<String> cmbCidade;
 	private ArrayList<String> cidades;
+
+	public FuncionariosView() {
+		preenchimentoInicial();
+		initialize();
+	}
 
 	private void salvarModelo() {
 		int i = tableFuncionario.getSelectedRow();
@@ -87,9 +94,8 @@ public class FuncionariosView extends JFrame {
 				throw new EmailException("E-mail inválido.");
 			}
 
-			int matricula = 0;
-//			matricula = clienteController.salvaCliente(txtNome.getText(), rdbtnPlatinum.isSelected(), cpf, telefone,
-//					txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
+			int matricula = funcionarioController.salvaFuncionario(txtNome.getText(), cpf, telefone, txtEmail.getText(),
+					txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 			row[0] = matricula;
 			row[1] = txtNome.getText();
@@ -133,8 +139,8 @@ public class FuncionariosView extends JFrame {
 					throw new EmailException("E-mail inválido.");
 				}
 
-//				clienteController.editaCliente(i, txtNome.getText(), rdbtnPlatinum.isSelected(), telefone,
-//						txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
+				funcionarioController.editaFuncionario(i, txtNome.getText(), telefone, txtEmail.getText(),
+						txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 				tableModel.setValueAt(txtNome.getText(), i, 1);
 				tableModel.setValueAt(txtTelefone.getText(), i, 3);
@@ -161,7 +167,7 @@ public class FuncionariosView extends JFrame {
 	private void removerModelo() {
 		int i = tableFuncionario.getSelectedRow();
 		if (i >= 0) {
-//			clienteController.removeCliente(i);
+			funcionarioController.removeFuncionario(i);
 			tableModel.removeRow(i);
 		}
 	}
@@ -204,11 +210,10 @@ public class FuncionariosView extends JFrame {
 
 			String cidade = String.format("%s - %s", tableModel.getValueAt(i, 8).toString(),
 					tableModel.getValueAt(i, 9).toString());
-			int index = 0;
 
+			int index = 0;
 			for (String c : cidades) {
 				if (c.equals(cidade)) {
-					System.out.println(index);
 					cmbCidade.setSelectedIndex(index);
 					break;
 				}
@@ -220,34 +225,37 @@ public class FuncionariosView extends JFrame {
 	}
 
 	private void preenchimentoInicial() {
+		cmbCidade = new JComboBox<String>();
+		cidadeController = new CidadeController();
+		funcionarioController = new FuncionarioController();
+
 		tableModel = new DefaultTableModel();
+
 		Object[] column = { "Matrícula", "Nome", "CPF", "Telefone", "E-mail", "Logradouro", "Número", "Bairro",
 				"Cidade", "UF" };
 		tableModel.setColumnIdentifiers(column);
 
-//		ArrayList<Object[]> rows = clienteController.listarClientes();
-//		for (Object[] row : rows) {
-//			tableModel.addRow(row);
-//		}
+		ArrayList<Object[]> rows = funcionarioController.listarFuncionarios();
+		for (Object[] row : rows) {
+			tableModel.addRow(row);
+		}
 
 		cidades = cidadeController.listaCidades();
 		for (String c : cidades) {
 			cmbCidade.addItem(c);
 		}
 
+		tableFuncionario = new JTable();
 		tableFuncionario.setModel(tableModel);
 	}
 
-	public FuncionariosView() {
-		setTitle("Controle de Clientes");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	private void initialize() {
+		setTitle("Controle de Funcionários");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1000, 580);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-
-		cmbCidade = new JComboBox<String>();
-		cidadeController = new CidadeController();
 
 		JPanel panelHeader = new JPanel();
 
@@ -276,7 +284,6 @@ public class FuncionariosView extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		panelBody.add(scrollPane, gbc_scrollPane);
 
-		tableFuncionario = new JTable();
 		tableFuncionario.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -285,7 +292,6 @@ public class FuncionariosView extends JFrame {
 		});
 		tableFuncionario.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(tableFuncionario);
-		preenchimentoInicial();
 
 		JPanel panel = new JPanel();
 		GridBagConstraints gbc_panel = new GridBagConstraints();

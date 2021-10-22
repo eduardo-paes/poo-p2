@@ -8,7 +8,7 @@ public class Funcionario extends Pessoa implements IFuncionario {
 	private final int matricula;
 	private static int contadorMatricula = 1;
 
-	public Funcionario(int cpf, String nome, long telefone, Endereco endereco) {
+	public Funcionario(long cpf, String nome, long telefone, Endereco endereco) {
 		super(cpf, nome, telefone, endereco);
 		this.matricula = contadorMatricula++;
 	}

@@ -14,7 +14,6 @@ public class ClienteController {
 	private ClientePersistence clientePersistence;
 
 	public ClienteController() {
-		clientes = new ArrayList<Cliente>();
 		clientePersistence = new ClientePersistence();
 		clientes = clientePersistence.extraiDadosArquivo();
 	}

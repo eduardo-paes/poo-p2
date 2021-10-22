@@ -12,7 +12,6 @@ public class VeiculoController {
 	private VeiculoPersistence persistence;
 
 	public VeiculoController() {
-		veiculos = new ArrayList<Veiculo>();
 		persistence = new VeiculoPersistence();
 		veiculos = persistence.extraiDadosArquivo();
 	}
@@ -50,6 +49,7 @@ public class VeiculoController {
 			veiculo = new Veiculo(modelo, chassi, ano, cor, placa);
 		}
 
+		// TODO: Salvar Proprietario
 		if (cpfCliente.length() > 0) {
 			veiculo.setProprietario(null);
 		}
@@ -68,6 +68,8 @@ public class VeiculoController {
 			if (cor.length() > 0) {
 				veiculo.setCor(cor);
 			}
+			
+			// TODO: Editar Proprietario
 			if (cpfCliente.length() > 0) {
 				veiculo.setProprietario(null);
 			}

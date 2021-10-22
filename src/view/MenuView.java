@@ -61,11 +61,11 @@ public class MenuView extends JFrame {
 		});
 	}
 
-	private void openControleItens() {
+	private void openControleCatalogo() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ItensView frame = new ItensView();
+					CatalogoView frame = new CatalogoView();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -169,19 +169,19 @@ public class MenuView extends JFrame {
 		contentPane.add(btnControleFuncionarios, gbc_btnControleFuncionarios);
 
 		// ITENS
-		JButton btnControleItens = new JButton("Controle de Itens");
-		btnControleItens.addActionListener(new ActionListener() {
+		JButton btnControleCatalogo = new JButton("Controle de Cat\u00E1logo");
+		btnControleCatalogo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				openControleItens();
+				openControleCatalogo();
 			}
 		});
-		btnControleItens.setPreferredSize(new Dimension(400, 40));
-		GridBagConstraints gbc_btnControleItens = new GridBagConstraints();
-		gbc_btnControleItens.fill = GridBagConstraints.BOTH;
-		gbc_btnControleItens.insets = new Insets(0, 0, 5, 0);
-		gbc_btnControleItens.gridx = 0;
-		gbc_btnControleItens.gridy = 5;
-		contentPane.add(btnControleItens, gbc_btnControleItens);
+		btnControleCatalogo.setPreferredSize(new Dimension(400, 40));
+		GridBagConstraints gbc_btnControleCatalogo = new GridBagConstraints();
+		gbc_btnControleCatalogo.fill = GridBagConstraints.BOTH;
+		gbc_btnControleCatalogo.insets = new Insets(0, 0, 5, 0);
+		gbc_btnControleCatalogo.gridx = 0;
+		gbc_btnControleCatalogo.gridy = 5;
+		contentPane.add(btnControleCatalogo, gbc_btnControleCatalogo);
 		btnControleServicos.setPreferredSize(new Dimension(400, 40));
 		GridBagConstraints gbc_btnControleServicos = new GridBagConstraints();
 		gbc_btnControleServicos.fill = GridBagConstraints.BOTH;
