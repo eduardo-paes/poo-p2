@@ -12,10 +12,17 @@ import persistence.ClientePersistence;
 public class ClienteController {
 	private ArrayList<Cliente> clientes;
 	private ClientePersistence clientePersistence;
+	private static ClienteController instance;
 
-	public ClienteController() {
+	private ClienteController() {
 		clientePersistence = new ClientePersistence();
 		clientes = clientePersistence.extraiDadosArquivo();
+	}
+	
+	public static ClienteController getInstance() {
+		if (instance == null)
+			instance = new ClienteController();
+		return instance;
 	}
 
 	public ArrayList<Object[]> listarClientes() {
@@ -53,7 +60,7 @@ public class ClienteController {
 	public void salvaCliente(String nome, boolean isPlatinum, long cpf, long telefone, String email, String logradouro,
 			int numero, String bairro, String nomeCidade, String uf) {
 
-		Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
+		Cidade cidade = CidadeController.getInstance().encontrarCidade(nomeCidade, uf);
 
 		if (cidade != null) {
 			Endereco endereco = new Endereco(logradouro, numero, bairro, cidade);
@@ -94,14 +101,14 @@ public class ClienteController {
 			}
 
 			if (!bairro.isEmpty()) {
-				cliente.getEndereco().setLogradouro(bairro);
+				cliente.getEndereco().setBairro(bairro);
 			}
 
 			if (numero != cliente.getEndereco().getNumero()) {
 				cliente.getEndereco().setNumero(numero);
 			}
 
-			Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
+			Cidade cidade = CidadeController.getInstance().encontrarCidade(nomeCidade, uf);
 			cliente.getEndereco().setCidade(cidade);
 
 			clientePersistence.salvaDadosArquivo(clientes);

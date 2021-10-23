@@ -34,8 +34,6 @@ public class VeiculosView extends JFrame {
 
 	private static final long serialVersionUID = 201898579411192642L;
 
-	private VeiculoController veiculoController;
-	private ClienteController clienteController;
 	private DefaultTableModel tableModel;
 	private Map<Long, String> proprietarios;
 
@@ -65,7 +63,7 @@ public class VeiculosView extends JFrame {
 				if (cmbProprietario.getSelectedItem() != null) {
 					cpfProprietario = cmbProprietario.getSelectedItem().toString();
 				}
-				veiculoController.salvaVeiculo(txtChassi.getText(), ano, txtCor.getText(), txtPlaca.getText(),
+				VeiculoController.getInstance().salvaVeiculo(txtChassi.getText(), ano, txtCor.getText(), txtPlaca.getText(),
 						txtModelo.getText(), cpfProprietario);
 
 				Object[] row = new Object[6];
@@ -94,7 +92,7 @@ public class VeiculosView extends JFrame {
 				cpfProprietario = cmbProprietario.getSelectedItem().toString();
 			}
 
-			veiculoController.editaVeiculo(i, txtCor.getText(), txtPlaca.getText(), cpfProprietario);
+			VeiculoController.getInstance().editaVeiculo(i, txtCor.getText(), txtPlaca.getText(), cpfProprietario);
 
 			tableModel.setValueAt(txtCor.getText(), i, 2);
 			tableModel.setValueAt(txtPlaca.getText(), i, 3);
@@ -110,7 +108,7 @@ public class VeiculosView extends JFrame {
 	private void removerModelo() {
 		int i = tableVeiculo.getSelectedRow();
 		if (i >= 0) {
-			veiculoController.removerVeiculo(i);
+			VeiculoController.getInstance().removerVeiculo(i);
 			tableModel.removeRow(i);
 		}
 	}
@@ -154,8 +152,7 @@ public class VeiculosView extends JFrame {
 		Object[] column = { "Modelo", "Chassi", "Cor", "Placa", "Ano", "Proprietário" };
 		tableModel.setColumnIdentifiers(column);
 		
-		clienteController = new ClienteController();
-		proprietarios = clienteController.listarProprietarios();
+		proprietarios = ClienteController.getInstance().listarProprietarios();
 		cmbProprietario = new JComboBox<String>();
 		
 		for (Map.Entry<Long, String> entry : proprietarios.entrySet()) {
@@ -164,7 +161,7 @@ public class VeiculosView extends JFrame {
 			cmbProprietario.addItem(proprietario);
 		}
 
-		for (Object[] row : veiculoController.listarVeiculos()) {
+		for (Object[] row : VeiculoController.getInstance().listarVeiculos()) {
 			tableModel.addRow(row);
 		}
 
@@ -179,8 +176,6 @@ public class VeiculosView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-
-		veiculoController = new VeiculoController();
 
 		JPanel panelHeader = new JPanel();
 		JPanel panelBody = new JPanel();

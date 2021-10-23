@@ -11,19 +11,26 @@ import model.interfaces.IFuncionario;
 import persistence.FuncionarioPersistence;
 
 public class FuncionarioController {
-	private ArrayList<IFuncionario> funcionarios;
+	private ArrayList<Funcionario> funcionarios;
 	private FuncionarioPersistence funcionarioPersistence;
+	private static FuncionarioController instance;
 
-	public FuncionarioController() {
+	private FuncionarioController() {
 		funcionarioPersistence = new FuncionarioPersistence();
 		funcionarios = funcionarioPersistence.extraiDadosArquivo();
 	}
-
+	
+	public static FuncionarioController getInstance() {
+		if (instance == null)
+			instance = new FuncionarioController();
+		return instance;
+	}
+	
 	public ArrayList<Object[]> listarFuncionarios() {
 
 		ArrayList<Object[]> rows = new ArrayList<Object[]>();
 
-		for (IFuncionario f : funcionarios) {
+		for (Funcionario f : funcionarios) {
 			Object[] row = new Object[10];
 			row[0] = f.getMatricula();
 			row[1] = f.getNome();
@@ -51,10 +58,10 @@ public class FuncionarioController {
 		return proprietarios;
 	}
 
-	public int salvaFuncionario(String nome, long cpf, long telefone, String email, String logradouro,
-			int numero, String bairro, String nomeCidade, String uf) {
+	public int salvaFuncionario(String nome, long cpf, long telefone, String email, String logradouro, int numero,
+			String bairro, String nomeCidade, String uf) {
 
-		Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
+		Cidade cidade = CidadeController.getInstance().encontrarCidade(nomeCidade, uf);
 
 		if (cidade != null) {
 			Endereco endereco = new Endereco(logradouro, numero, bairro, cidade);
@@ -71,8 +78,8 @@ public class FuncionarioController {
 		return 0;
 	}
 
-	public void editaFuncionario(int id, String nome, long telefone, String email, String logradouro,
-			int numero, String bairro, String nomeCidade, String uf) {
+	public void editaFuncionario(int id, String nome, long telefone, String email, String logradouro, int numero,
+			String bairro, String nomeCidade, String uf) {
 
 		if (id >= 0 && id <= funcionarios.size()) {
 			Funcionario funcionario = (Funcionario) funcionarios.get(id);
@@ -94,14 +101,14 @@ public class FuncionarioController {
 			}
 
 			if (!bairro.isEmpty()) {
-				funcionario.getEndereco().setLogradouro(bairro);
+				funcionario.getEndereco().setBairro(bairro);
 			}
 
 			if (numero != funcionario.getEndereco().getNumero()) {
 				funcionario.getEndereco().setNumero(numero);
 			}
 
-			Cidade cidade = new CidadeController().encontrarCidade(nomeCidade, uf);
+			Cidade cidade = CidadeController.getInstance().encontrarCidade(nomeCidade, uf);
 			funcionario.getEndereco().setCidade(cidade);
 
 			funcionarioPersistence.salvaDadosArquivo(funcionarios);

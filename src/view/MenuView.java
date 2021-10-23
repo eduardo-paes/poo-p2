@@ -21,6 +21,10 @@ public class MenuView extends JFrame {
 	private static final long serialVersionUID = 517294119658988912L;
 
 	private JPanel contentPane;
+	
+	public MenuView() {
+		initialize();
+	}
 
 	private void openControleVeiculos() {
 		EventQueue.invokeLater(new Runnable() {
@@ -91,7 +95,7 @@ public class MenuView extends JFrame {
 		this.dispose();
 	}
 
-	public MenuView() {
+	public void initialize() {
 		// INICIALIZACAO
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 500);

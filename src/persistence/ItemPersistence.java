@@ -9,21 +9,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import model.Funcionario;
+import model.Item;
 
-public class FuncionarioPersistence {
-	private String arquivoDados = "funcionarios.bin";
+public class ItemPersistence {
+	private String arquivoDados = "itens.bin";
 	private ObjectInputStream input;
 	private ObjectOutputStream output;
 
 	@SuppressWarnings("unchecked")
-	public ArrayList<Funcionario> extraiDadosArquivo() {
-		ArrayList<Funcionario> funcionarios = new ArrayList<Funcionario>();
+	public ArrayList<Item> extraiDadosArquivo() {
+		ArrayList<Item> itens = new ArrayList<Item>();
 
 		try {
 			input = new ObjectInputStream(new FileInputStream(arquivoDados));
 			while (true) {
-				funcionarios = (ArrayList<Funcionario>) input.readObject();
+				itens = (ArrayList<Item>) input.readObject();
 			}
 		} catch (EOFException e) {
 			System.err.println("Arquivo importado.");
@@ -41,14 +41,13 @@ public class FuncionarioPersistence {
 				System.err.println("Erro ao fechar arquivo:");
 			}
 		}
-
-		return funcionarios;
+		return itens;
 	}
 
-	public void salvaDadosArquivo(ArrayList<Funcionario> funcionarios) {
+	public void salvaDadosArquivo(ArrayList<Item> itens) {
 		try {
 			output = new ObjectOutputStream(new FileOutputStream(arquivoDados));
-			output.writeObject(funcionarios);
+			output.writeObject(itens);
 		} catch (IOException e) {
 			System.err.println("Erro ao escrever no arquivo: " + e.getMessage().toString());
 		} finally {

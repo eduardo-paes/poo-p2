@@ -38,8 +38,6 @@ public class ClientesView extends JFrame {
 
 	private static final long serialVersionUID = 1282426518432472265L;
 
-	private ClienteController clienteController;
-	private CidadeController cidadeController;
 	private DefaultTableModel tableModel;
 
 	private JPanel contentPane;
@@ -54,6 +52,11 @@ public class ClientesView extends JFrame {
 	private JRadioButton rdbtnPlatinum;
 	private JComboBox<String> cmbCidade;
 	private ArrayList<String> cidades;
+
+	public ClientesView() {
+		initialize();
+		preenchimentoInicial();
+	}
 
 	private void salvarModelo() {
 		int i = tableCliente.getSelectedRow();
@@ -103,7 +106,7 @@ public class ClientesView extends JFrame {
 			row[8] = cidadeNome;
 			row[9] = uf;
 
-			clienteController.salvaCliente(txtNome.getText(), rdbtnPlatinum.isSelected(), cpf, telefone,
+			ClienteController.getInstance().salvaCliente(txtNome.getText(), rdbtnPlatinum.isSelected(), cpf, telefone,
 					txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 			tableModel.addRow(row);
@@ -137,7 +140,7 @@ public class ClientesView extends JFrame {
 					throw new EmailException("E-mail inválido.");
 				}
 
-				clienteController.editaCliente(i, txtNome.getText(), rdbtnPlatinum.isSelected(), telefone,
+				ClienteController.getInstance().editaCliente(i, txtNome.getText(), rdbtnPlatinum.isSelected(), telefone,
 						txtEmail.getText(), txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 				tableModel.setValueAt(txtNome.getText(), i, 0);
@@ -166,7 +169,7 @@ public class ClientesView extends JFrame {
 	private void removerModelo() {
 		int i = tableCliente.getSelectedRow();
 		if (i >= 0) {
-			clienteController.removeCliente(i);
+			ClienteController.getInstance().removeCliente(i);
 			tableModel.removeRow(i);
 		}
 	}
@@ -231,12 +234,12 @@ public class ClientesView extends JFrame {
 				"UF" };
 		tableModel.setColumnIdentifiers(column);
 
-		ArrayList<Object[]> rows = clienteController.listarClientes();
+		ArrayList<Object[]> rows = ClienteController.getInstance().listarClientes();
 		for (Object[] row : rows) {
 			tableModel.addRow(row);
 		}
 
-		cidades = cidadeController.listaCidades();
+		cidades = CidadeController.getInstance().listaCidades();
 		for (String c : cidades) {
 			cmbCidade.addItem(c);
 		}
@@ -244,7 +247,7 @@ public class ClientesView extends JFrame {
 		tableCliente.setModel(tableModel);
 	}
 
-	public ClientesView() {
+	public void initialize() {
 		setTitle("Controle de Clientes");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1000, 580);
@@ -253,8 +256,6 @@ public class ClientesView extends JFrame {
 		setContentPane(contentPane);
 
 		cmbCidade = new JComboBox<String>();
-		clienteController = new ClienteController();
-		cidadeController = new CidadeController();
 
 		JPanel panelHeader = new JPanel();
 
@@ -292,7 +293,6 @@ public class ClientesView extends JFrame {
 		});
 		tableCliente.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(tableCliente);
-		preenchimentoInicial();
 
 		JPanel panel = new JPanel();
 		GridBagConstraints gbc_panel = new GridBagConstraints();

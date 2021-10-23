@@ -1,13 +1,16 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import model.interfaces.IItem;
 
-public class Categoria {
+public class Categoria implements Serializable {
+
+	private static final long serialVersionUID = 8107502357582336083L;
 
 	private final String nome;
-	
+
 	private ArrayList<IItem> itens;
 
 	public Categoria(String nome) {
@@ -24,22 +27,23 @@ public class Categoria {
 	}
 
 	public void removeItem(IItem item) {
-		itens.remove(item);
-	}
-	
-	public StringBuilder listarItens() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("\nItens da Categoria - " + nome + ":");
-		int i = 1;
-		for (IItem item : itens) {
-
-			sb.append(
-					"\n\t" + (i++) + "." + "\tTipo: " + item.getTipo().getName() + "\t| Cód.: " + item.getCodigo()
-							+ "\t| Descrição: " + item.getDescricao() + "\t| Valor: R$ " + String.format("%.2f", item.getPreco()));
+		if (itens.remove(item)) {
+			System.out.println("Item removido");
 		}
+	}
 
-		return sb;
+	public ArrayList<Object[]> listarItens() {
+		ArrayList<Object[]> rows = new ArrayList<Object[]>();
+
+		for (IItem item : itens) {
+			Object[] row = new Object[4];
+			row[0] = item.getCodigo();
+			row[1] = item.getTipo().getName();
+			row[2] = item.getDescricao();
+			row[3] = String.format("%.2f", item.getPreco());
+			rows.add(row);
+		}
+		return rows;
 	}
 
 }

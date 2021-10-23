@@ -1,12 +1,16 @@
 package model;
 
+import java.io.Serializable;
+
 import model.enums.ETipoItem;
 import model.interfaces.IItem;
 
-public class Item implements IItem {
+public class Item implements IItem, Serializable {
+
+	private static final long serialVersionUID = -6635864714971060407L;
 
 	private static long contadorCodigo = 1;
-	
+
 	private final ETipoItem tipo;
 	private final long codigo;
 	private final String descricao;

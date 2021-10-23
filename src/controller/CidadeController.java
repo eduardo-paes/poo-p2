@@ -8,11 +8,18 @@ import persistence.CidadePersistence;
 public class CidadeController {
 	private ArrayList<Cidade> cidades;
 	private CidadePersistence cidadePersistence;
-
-	public CidadeController() {
+	private static CidadeController instance;
+	
+	private CidadeController() {
 		cidades = new ArrayList<Cidade>();
 		cidadePersistence = new CidadePersistence();
 		cidades = cidadePersistence.extraiDadosArquivo();
+	}
+	
+	public static CidadeController getInstance() {
+		if (instance == null)
+			instance = new CidadeController();
+		return instance;
 	}
 
 	public ArrayList<String> listaCidades() {

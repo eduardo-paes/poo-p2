@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,7 +12,9 @@ import model.interfaces.IFuncionario;
 import model.interfaces.IItem;
 import model.interfaces.IVeiculo;
 
-public class OrdemServico {
+public class OrdemServico implements Serializable {
+
+	private static final long serialVersionUID = 1918577112979137404L;
 
 	private static int contadorNumero = 1;
 
@@ -127,8 +130,8 @@ public class OrdemServico {
 
 		for (ItemOS item : itens) {
 			sb.append("\n\t\t" + (i++) + ".\tTipo: " + item.getTipo().getName() + "\t| Cód.: TODO "
-					+ "\t| Descrição: TODO \t| Quantidade: " + item.getQuantidade()
-					+ "\t| Valor: R$ " + String.format("%.2f", item.getPreco()));
+					+ "\t| Descrição: TODO \t| Quantidade: " + item.getQuantidade() + "\t| Valor: R$ "
+					+ String.format("%.2f", item.getPreco()));
 		}
 
 		sb.append("\n\t:: Valores");

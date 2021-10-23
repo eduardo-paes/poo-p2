@@ -36,8 +36,6 @@ import model.excepetions.EmailException;
 public class FuncionariosView extends JFrame {
 
 	private static final long serialVersionUID = 5271393556968559860L;
-	private CidadeController cidadeController;
-	private FuncionarioController funcionarioController;
 	private DefaultTableModel tableModel;
 
 	private JPanel contentPane;
@@ -94,7 +92,7 @@ public class FuncionariosView extends JFrame {
 				throw new EmailException("E-mail inválido.");
 			}
 
-			int matricula = funcionarioController.salvaFuncionario(txtNome.getText(), cpf, telefone, txtEmail.getText(),
+			int matricula = FuncionarioController.getInstance().salvaFuncionario(txtNome.getText(), cpf, telefone, txtEmail.getText(),
 					txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 			row[0] = matricula;
@@ -139,7 +137,7 @@ public class FuncionariosView extends JFrame {
 					throw new EmailException("E-mail inválido.");
 				}
 
-				funcionarioController.editaFuncionario(i, txtNome.getText(), telefone, txtEmail.getText(),
+				FuncionarioController.getInstance().editaFuncionario(i, txtNome.getText(), telefone, txtEmail.getText(),
 						txtLogradouro.getText(), numero, txtBairro.getText(), cidadeNome, uf);
 
 				tableModel.setValueAt(txtNome.getText(), i, 1);
@@ -167,7 +165,7 @@ public class FuncionariosView extends JFrame {
 	private void removerModelo() {
 		int i = tableFuncionario.getSelectedRow();
 		if (i >= 0) {
-			funcionarioController.removeFuncionario(i);
+			FuncionarioController.getInstance().removeFuncionario(i);
 			tableModel.removeRow(i);
 		}
 	}
@@ -226,8 +224,6 @@ public class FuncionariosView extends JFrame {
 
 	private void preenchimentoInicial() {
 		cmbCidade = new JComboBox<String>();
-		cidadeController = new CidadeController();
-		funcionarioController = new FuncionarioController();
 
 		tableModel = new DefaultTableModel();
 
@@ -235,12 +231,12 @@ public class FuncionariosView extends JFrame {
 				"Cidade", "UF" };
 		tableModel.setColumnIdentifiers(column);
 
-		ArrayList<Object[]> rows = funcionarioController.listarFuncionarios();
+		ArrayList<Object[]> rows = FuncionarioController.getInstance().listarFuncionarios();
 		for (Object[] row : rows) {
 			tableModel.addRow(row);
 		}
 
-		cidades = cidadeController.listaCidades();
+		cidades = CidadeController.getInstance().listaCidades();
 		for (String c : cidades) {
 			cmbCidade.addItem(c);
 		}
