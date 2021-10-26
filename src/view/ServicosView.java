@@ -8,7 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -16,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -25,6 +27,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import controller.CategoriaController;
+import controller.FuncionarioController;
+import controller.ServicosController;
 import controller.VeiculoController;
 
 public class ServicosView extends JFrame {
@@ -41,25 +46,29 @@ public class ServicosView extends JFrame {
 	private JTextField txtPrecoItem;
 	private JTextField txtDescricao;
 	private JTextField txtKmAtual;
+	private JComboBox<String> cmbCategoria;
+	private JComboBox<String> cmbItem;
+	private JComboBox<String> cmbVeiculo;
+	private JComboBox<String> cmbFuncionario;
+
 	private JTextField txtNomeCliente;
 	private JTextField txtTelefoneCliente;
 	private JTextField txtEmailCliente;
-	private JTextField txtPlaca;
-	private JTextField txtCor;
-	private JTextField txtAno;
 	private JTextField txtModelo;
-
-	private JComboBox cmbCategoria;
-	private JComboBox cmbItem;
-	private JComboBox cmbVeiculo;
-	private JComboBox cmbFuncionario;
+	private JTextField txtAno;
+	private JTextField txtCor;
+	private JTextField txtPlaca;
 	private JTextField txtValorTotal;
 	private JTextField txtValorDesconto;
 	private JTextField txtValorPecas;
 	private JTextField txtValorServicos;
 
 	public void limparFormularioServico() {
-
+		cmbFuncionario.setSelectedIndex(-1);
+		cmbVeiculo.setSelectedIndex(-1);
+		txtKmAtual.setText("");
+		txtDescricao.setText("");
+		tableServicos.clearSelection();
 	}
 
 	public void removerServico() {
@@ -71,7 +80,74 @@ public class ServicosView extends JFrame {
 	}
 
 	public void salvarServico() {
+		int i = tableServicos.getSelectedRow();
+		if (i >= 0) {
+			return;
+		}
 
+		if (cmbVeiculo.getSelectedIndex() == -1 || txtKmAtual.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "É necessário preencher os campos Veículo e KM Atual.");
+		} else {
+			try {
+				int kmAtual = Integer.parseInt(txtKmAtual.getText());
+				int matriculaFuncionario = 0;
+
+				if (cmbFuncionario.getSelectedIndex() != -1) {
+					String funcionario = cmbFuncionario.getSelectedItem().toString();
+					matriculaFuncionario = Integer.parseInt(funcionario.substring(0, funcionario.indexOf(' ')));
+				}
+
+				String veiculo = cmbVeiculo.getSelectedItem().toString();
+				String chassi = veiculo.substring(veiculo.indexOf('-') + 2);
+
+				Date dataAtual = new Date();
+
+				int numero = ServicosController.getInstance().salvarServico(chassi, kmAtual, matriculaFuncionario,
+						txtDescricao.getText());
+
+				Object[] row = new Object[7];
+				row[0] = numero;
+				row[1] = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(dataAtual);
+				row[2] = veiculo;
+				row[3] = VeiculoController.getInstance().encontraProprietario(chassi);
+				row[4] = cmbFuncionario.getSelectedItem().toString();
+				row[5] = txtKmAtual.getText();
+				row[6] = txtDescricao.getText();
+
+				tableModelServicos.addRow(row);
+
+				limparFormularioServico();
+				JOptionPane.showMessageDialog(null, "Ordem de Serviço Salva");
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "KM atual deve ser um número inteiro.");
+			}
+
+		}
+	}
+
+	public void selecionarServico() {
+		int i = tableServicos.getSelectedRow();
+		if (i >= 0) {
+
+			System.out.print(i);
+
+			Object[] info = ServicosController.getInstance().listarInfoOS(i);
+
+			System.out.print(info[0]);
+
+			int index = 0;
+			txtNomeCliente.setText(info[index++].toString());
+			txtTelefoneCliente.setText(info[index++].toString());
+			txtEmailCliente.setText(info[index++].toString());
+			txtModelo.setText(info[index++].toString());
+			txtAno.setText(info[index++].toString());
+			txtCor.setText(info[index++].toString());
+			txtPlaca.setText(info[index++].toString());
+			txtValorTotal.setText(info[index++].toString());
+			txtValorDesconto.setText(info[index++].toString());
+			txtValorPecas.setText(info[index++].toString());
+			txtValorServicos.setText(info[index++].toString());
+		}
 	}
 
 	private void salvarItem() {
@@ -101,25 +177,32 @@ public class ServicosView extends JFrame {
 	private void preenchimentoInicial() {
 		cmbFuncionario = new JComboBox<String>();
 		cmbVeiculo = new JComboBox<String>();
-		cmbItem = new JComboBox<String>();
 		cmbCategoria = new JComboBox<String>();
+		cmbItem = new JComboBox<String>();
 
-		ArrayList<Object[]> veiculos = VeiculoController.getInstance().listarVeiculos();
-		for (Object[] row : veiculos) {
-			String veiculo = String.format("%s %s (%s) - %s", row[0], row[2], row[4], row[1]);
-			cmbVeiculo.addItem(veiculo);
+		for (Object[] row : VeiculoController.getInstance().listarVeiculos()) {
+			String str = String.format("%s %s (%s) - %s", row[0], row[2], row[4], row[1]);
+			cmbVeiculo.addItem(str);
 		}
 
-//		cmbTipoItem = new JComboBox<String>();
-//		ArrayList<String> tipos = ItemController.getInstance().getTipoItems();
-//		for (String tipo : tipos) {
-//			cmbTipoItem.addItem(tipo);
-//		}
+		for (Object[] row : FuncionarioController.getInstance().listarFuncionarios()) {
+			String str = String.format("%s - %s", row[0], row[1]);
+			cmbFuncionario.addItem(str);
+		}
+
+		for (Object[] row : CategoriaController.getInstance().listarCategorias()) {
+			cmbCategoria.addItem(row[0].toString());
+		}
+
+		for (Object[] row : CategoriaController.getInstance().listarItensCategoria(0)) {
+			String str = String.format("%s - %s", row[0], row[2]);
+			cmbItem.addItem(str);
+		}
 
 		tableModelServicos = new DefaultTableModel();
-		Object[] columnCategoria = { "N\u00BA", "Data Entrada", "Ve\u00EDculo", "Propriet\u00E1rio", "Consultor",
+		Object[] columnServicos = { "N\u00BA", "Data Entrada", "Ve\u00EDculo", "Propriet\u00E1rio", "Consultor",
 				"KM Atual", "Descri\u00E7\u00E3o" };
-		tableModelServicos.setColumnIdentifiers(columnCategoria);
+		tableModelServicos.setColumnIdentifiers(columnServicos);
 
 		tableModelItens = new DefaultTableModel();
 		Object[] columnItem = { "Código", "Tipo", "Descri\u00E7\u00E3o", "Quantidade", "Preço" };
@@ -127,9 +210,6 @@ public class ServicosView extends JFrame {
 
 		tableServicos = new JTable();
 		tableServicos.setModel(tableModelServicos);
-
-		tableItem = new JTable();
-		tableItem.setModel(tableModelItens);
 	}
 
 	public ServicosView() {
@@ -140,67 +220,116 @@ public class ServicosView extends JFrame {
 	public void initialize() {
 		setTitle("Controle de Cat\u00E1logo");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 1000, 600);
+		setBounds(100, 100, 1035, 675);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 
 		JPanel panelHeader = new JPanel();
 		JPanel panelServicos = new JPanel();
+
+		JPanel panelInfoOS = new JPanel();
+
 		JPanel panelItem = new JPanel();
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-						.addComponent(panelServicos, GroupLayout.PREFERRED_SIZE, 382, GroupLayout.PREFERRED_SIZE)
+						.addComponent(panelInfoOS, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelItem, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE))
-				.addComponent(panelHeader, GroupLayout.DEFAULT_SIZE, 974, Short.MAX_VALUE));
+						.addComponent(panelServicos, GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panelItem, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE))
+				.addComponent(panelHeader, GroupLayout.DEFAULT_SIZE, 1210, Short.MAX_VALUE));
 		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
 				.createSequentialGroup()
 				.addComponent(
 						panelHeader, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.UNRELATED)
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(panelItem, GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE)
-						.addComponent(panelServicos, GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE))));
-
-		JPanel panelItemHeader = new JPanel();
-
-		JPanel panelItemBody = new JPanel();
-
-		JPanel panel_2 = new JPanel();
-		GroupLayout gl_panelItem = new GroupLayout(panelItem);
-		gl_panelItem.setHorizontalGroup(gl_panelItem.createParallelGroup(Alignment.TRAILING)
-				.addComponent(panelItemBody, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
-				.addGroup(gl_panelItem.createSequentialGroup()
-						.addComponent(panel_2, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelItemHeader, GroupLayout.PREFERRED_SIZE, 309, GroupLayout.PREFERRED_SIZE)));
-		gl_panelItem.setVerticalGroup(gl_panelItem.createParallelGroup(Alignment.LEADING).addGroup(gl_panelItem
-				.createSequentialGroup()
-				.addGroup(gl_panelItem.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(panel_2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(panelItemHeader, GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE))
 				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(panelItemBody, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)));
-		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[] { 0, 0 };
-		gbl_panel_2.rowHeights = new int[] { 0, 0 };
-		gbl_panel_2.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_panel_2.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
-		panel_2.setLayout(gbl_panel_2);
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addComponent(panelItem, GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
+						.addComponent(panelInfoOS, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(panelServicos, GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE))
+				.addContainerGap()));
 
-		JLabel lblInfoOS = new JLabel("Informa\u00E7\u00F5es OS");
-		lblInfoOS.setFont(new Font("Calibri", Font.BOLD, 22));
-		GridBagConstraints gbc_lblInfoOS = new GridBagConstraints();
-		gbc_lblInfoOS.fill = GridBagConstraints.BOTH;
-		gbc_lblInfoOS.gridx = 0;
-		gbc_lblInfoOS.gridy = 0;
-		panel_2.add(lblInfoOS, gbc_lblInfoOS);
+		JLabel lblItemOS = new JLabel("Itens da OS");
+		lblItemOS.setFont(new Font("Calibri", Font.BOLD, 22));
 
-		JPanel panelItemTable = new JPanel();
-		JPanel panelItemButton = new JPanel();
+		JPanel panelItemForm = new JPanel();
+		GridBagLayout gbl_panelItemForm = new GridBagLayout();
+		gbl_panelItemForm.columnWidths = new int[] { 0, 0, 0 };
+		gbl_panelItemForm.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gbl_panelItemForm.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelItemForm.rowWeights = new double[] { 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE };
+		panelItemForm.setLayout(gbl_panelItemForm);
+
+		JLabel lblCategoria = new JLabel("Categoria");
+		GridBagConstraints gbc_lblCategoria = new GridBagConstraints();
+		gbc_lblCategoria.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblCategoria.insets = new Insets(0, 0, 5, 5);
+		gbc_lblCategoria.gridx = 0;
+		gbc_lblCategoria.gridy = 0;
+		panelItemForm.add(lblCategoria, gbc_lblCategoria);
+
+		GridBagConstraints gbc_cmbCategoria = new GridBagConstraints();
+		gbc_cmbCategoria.fill = GridBagConstraints.BOTH;
+		gbc_cmbCategoria.insets = new Insets(0, 0, 5, 0);
+		gbc_cmbCategoria.gridx = 1;
+		gbc_cmbCategoria.gridy = 0;
+		panelItemForm.add(cmbCategoria, gbc_cmbCategoria);
+
+		JLabel lblItem = new JLabel("Item");
+		GridBagConstraints gbc_lblItem = new GridBagConstraints();
+		gbc_lblItem.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblItem.insets = new Insets(0, 0, 5, 5);
+		gbc_lblItem.gridx = 0;
+		gbc_lblItem.gridy = 1;
+		panelItemForm.add(lblItem, gbc_lblItem);
+
+		GridBagConstraints gbc_cmbItem = new GridBagConstraints();
+		gbc_cmbItem.fill = GridBagConstraints.BOTH;
+		gbc_cmbItem.insets = new Insets(0, 0, 5, 0);
+		gbc_cmbItem.gridx = 1;
+		gbc_cmbItem.gridy = 1;
+		panelItemForm.add(cmbItem, gbc_cmbItem);
+
+		JLabel lblQuantidadeItem = new JLabel("Quantidade");
+		GridBagConstraints gbc_lblQuantidadeItem = new GridBagConstraints();
+		gbc_lblQuantidadeItem.fill = GridBagConstraints.BOTH;
+		gbc_lblQuantidadeItem.insets = new Insets(0, 0, 5, 5);
+		gbc_lblQuantidadeItem.gridx = 0;
+		gbc_lblQuantidadeItem.gridy = 2;
+		panelItemForm.add(lblQuantidadeItem, gbc_lblQuantidadeItem);
+		lblQuantidadeItem.setHorizontalAlignment(SwingConstants.LEFT);
+
+		txtQuantidadeItem = new JTextField();
+		GridBagConstraints gbc_txtQuantidadeItem = new GridBagConstraints();
+		gbc_txtQuantidadeItem.fill = GridBagConstraints.BOTH;
+		gbc_txtQuantidadeItem.insets = new Insets(0, 0, 5, 0);
+		gbc_txtQuantidadeItem.gridx = 1;
+		gbc_txtQuantidadeItem.gridy = 2;
+		panelItemForm.add(txtQuantidadeItem, gbc_txtQuantidadeItem);
+		txtQuantidadeItem.setColumns(10);
+
+		JLabel lblPrecoItem = new JLabel("Pre\u00E7o");
+		GridBagConstraints gbc_lblPrecoItem = new GridBagConstraints();
+		gbc_lblPrecoItem.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblPrecoItem.insets = new Insets(0, 0, 0, 5);
+		gbc_lblPrecoItem.gridx = 0;
+		gbc_lblPrecoItem.gridy = 3;
+		panelItemForm.add(lblPrecoItem, gbc_lblPrecoItem);
+		lblPrecoItem.setHorizontalAlignment(SwingConstants.LEFT);
+
+		txtPrecoItem = new JTextField();
+		GridBagConstraints gbc_txtPrecoItem = new GridBagConstraints();
+		gbc_txtPrecoItem.fill = GridBagConstraints.BOTH;
+		gbc_txtPrecoItem.gridx = 1;
+		gbc_txtPrecoItem.gridy = 3;
+		panelItemForm.add(txtPrecoItem, gbc_txtPrecoItem);
+		txtPrecoItem.setColumns(10);
+
+		tableItem = new JTable();
+		tableItem.setModel(tableModelItens);
 
 		JScrollPane scrollPaneItem = new JScrollPane();
 
@@ -211,328 +340,7 @@ public class ServicosView extends JFrame {
 				selecionarItem();
 			}
 		});
-
-		JPanel panel_1 = new JPanel();
-		GroupLayout gl_panelItemBody = new GroupLayout(panelItemBody);
-		gl_panelItemBody.setHorizontalGroup(gl_panelItemBody.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panelItemBody.createSequentialGroup()
-						.addComponent(panelItemTable, GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelItemBody.createParallelGroup(Alignment.TRAILING)
-								.addGroup(gl_panelItemBody.createParallelGroup(Alignment.LEADING, false)
-										.addComponent(scrollPaneItem, Alignment.TRAILING, 0, 0, Short.MAX_VALUE)
-										.addComponent(panelItemButton, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE,
-												309, Short.MAX_VALUE))
-								.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 309, GroupLayout.PREFERRED_SIZE))));
-		gl_panelItemBody.setVerticalGroup(gl_panelItemBody.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelItemBody.createSequentialGroup()
-						.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 99, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(scrollPaneItem, GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelItemButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-				.addComponent(panelItemTable, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE));
-		GridBagLayout gbl_panelItemTable = new GridBagLayout();
-		gbl_panelItemTable.columnWidths = new int[] { 0, 0, 0 };
-		gbl_panelItemTable.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panelItemTable.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_panelItemTable.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, Double.MIN_VALUE };
-		panelItemTable.setLayout(gbl_panelItemTable);
-
-		JLabel lblInfoCliente = new JLabel("Cliente");
-		lblInfoCliente.setFont(new Font("Calibri", Font.BOLD, 18));
-		GridBagConstraints gbc_lblInfoCliente = new GridBagConstraints();
-		gbc_lblInfoCliente.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblInfoCliente.insets = new Insets(0, 0, 5, 5);
-		gbc_lblInfoCliente.gridx = 0;
-		gbc_lblInfoCliente.gridy = 0;
-		panelItemTable.add(lblInfoCliente, gbc_lblInfoCliente);
-
-		JLabel lblClienteNome = new JLabel("Nome");
-		GridBagConstraints gbc_lblClienteNome = new GridBagConstraints();
-		gbc_lblClienteNome.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblClienteNome.insets = new Insets(0, 0, 5, 5);
-		gbc_lblClienteNome.gridx = 0;
-		gbc_lblClienteNome.gridy = 1;
-		panelItemTable.add(lblClienteNome, gbc_lblClienteNome);
-
-		txtNomeCliente = new JTextField();
-		txtNomeCliente.setEditable(false);
-		GridBagConstraints gbc_txtNomeCliente = new GridBagConstraints();
-		gbc_txtNomeCliente.insets = new Insets(0, 0, 5, 0);
-		gbc_txtNomeCliente.fill = GridBagConstraints.BOTH;
-		gbc_txtNomeCliente.gridx = 1;
-		gbc_txtNomeCliente.gridy = 1;
-		panelItemTable.add(txtNomeCliente, gbc_txtNomeCliente);
-		txtNomeCliente.setColumns(10);
-
-		JLabel lblClienteTelefone = new JLabel("Telefone");
-		GridBagConstraints gbc_lblClienteTelefone = new GridBagConstraints();
-		gbc_lblClienteTelefone.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblClienteTelefone.insets = new Insets(0, 0, 5, 5);
-		gbc_lblClienteTelefone.gridx = 0;
-		gbc_lblClienteTelefone.gridy = 2;
-		panelItemTable.add(lblClienteTelefone, gbc_lblClienteTelefone);
-
-		txtTelefoneCliente = new JTextField();
-		txtTelefoneCliente.setEditable(false);
-		GridBagConstraints gbc_txtTelefoneCliente = new GridBagConstraints();
-		gbc_txtTelefoneCliente.insets = new Insets(0, 0, 5, 0);
-		gbc_txtTelefoneCliente.fill = GridBagConstraints.BOTH;
-		gbc_txtTelefoneCliente.gridx = 1;
-		gbc_txtTelefoneCliente.gridy = 2;
-		panelItemTable.add(txtTelefoneCliente, gbc_txtTelefoneCliente);
-		txtTelefoneCliente.setColumns(10);
-
-		JLabel lblClienteEmail = new JLabel("Email");
-		GridBagConstraints gbc_lblClienteEmail = new GridBagConstraints();
-		gbc_lblClienteEmail.insets = new Insets(0, 0, 5, 5);
-		gbc_lblClienteEmail.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblClienteEmail.gridx = 0;
-		gbc_lblClienteEmail.gridy = 3;
-		panelItemTable.add(lblClienteEmail, gbc_lblClienteEmail);
-
-		txtEmailCliente = new JTextField();
-		txtEmailCliente.setEditable(false);
-		GridBagConstraints gbc_txtEmailCliente = new GridBagConstraints();
-		gbc_txtEmailCliente.insets = new Insets(0, 0, 5, 0);
-		gbc_txtEmailCliente.fill = GridBagConstraints.BOTH;
-		gbc_txtEmailCliente.gridx = 1;
-		gbc_txtEmailCliente.gridy = 3;
-		panelItemTable.add(txtEmailCliente, gbc_txtEmailCliente);
-		txtEmailCliente.setColumns(10);
-
-		JLabel lblInfoVeiculo = new JLabel("Ve\u00EDculo");
-		lblInfoVeiculo.setFont(new Font("Calibri", Font.BOLD, 18));
-		GridBagConstraints gbc_lblInfoVeiculo = new GridBagConstraints();
-		gbc_lblInfoVeiculo.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblInfoVeiculo.insets = new Insets(0, 0, 5, 5);
-		gbc_lblInfoVeiculo.gridx = 0;
-		gbc_lblInfoVeiculo.gridy = 5;
-		panelItemTable.add(lblInfoVeiculo, gbc_lblInfoVeiculo);
-
-		JLabel lblModelo = new JLabel("Modelo");
-		GridBagConstraints gbc_lblModelo = new GridBagConstraints();
-		gbc_lblModelo.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblModelo.insets = new Insets(0, 0, 5, 5);
-		gbc_lblModelo.gridx = 0;
-		gbc_lblModelo.gridy = 6;
-		panelItemTable.add(lblModelo, gbc_lblModelo);
-
-		txtModelo = new JTextField();
-		txtModelo.setEditable(false);
-		GridBagConstraints gbc_txtModelo = new GridBagConstraints();
-		gbc_txtModelo.insets = new Insets(0, 0, 5, 0);
-		gbc_txtModelo.fill = GridBagConstraints.BOTH;
-		gbc_txtModelo.gridx = 1;
-		gbc_txtModelo.gridy = 6;
-		panelItemTable.add(txtModelo, gbc_txtModelo);
-		txtModelo.setColumns(10);
-
-		JLabel lblAno = new JLabel("Ano");
-		GridBagConstraints gbc_lblAno = new GridBagConstraints();
-		gbc_lblAno.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblAno.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAno.gridx = 0;
-		gbc_lblAno.gridy = 7;
-		panelItemTable.add(lblAno, gbc_lblAno);
-
-		txtAno = new JTextField();
-		txtAno.setEditable(false);
-		GridBagConstraints gbc_txtAno = new GridBagConstraints();
-		gbc_txtAno.insets = new Insets(0, 0, 5, 0);
-		gbc_txtAno.fill = GridBagConstraints.BOTH;
-		gbc_txtAno.gridx = 1;
-		gbc_txtAno.gridy = 7;
-		panelItemTable.add(txtAno, gbc_txtAno);
-		txtAno.setColumns(10);
-
-		JLabel lblCor = new JLabel("Cor");
-		GridBagConstraints gbc_lblCor = new GridBagConstraints();
-		gbc_lblCor.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblCor.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCor.gridx = 0;
-		gbc_lblCor.gridy = 8;
-		panelItemTable.add(lblCor, gbc_lblCor);
-
-		txtCor = new JTextField();
-		txtCor.setEditable(false);
-		GridBagConstraints gbc_txtCor = new GridBagConstraints();
-		gbc_txtCor.insets = new Insets(0, 0, 5, 0);
-		gbc_txtCor.fill = GridBagConstraints.BOTH;
-		gbc_txtCor.gridx = 1;
-		gbc_txtCor.gridy = 8;
-		panelItemTable.add(txtCor, gbc_txtCor);
-		txtCor.setColumns(10);
-
-		JLabel lblPlaca = new JLabel("Placa");
-		GridBagConstraints gbc_lblPlaca = new GridBagConstraints();
-		gbc_lblPlaca.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblPlaca.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPlaca.gridx = 0;
-		gbc_lblPlaca.gridy = 9;
-		panelItemTable.add(lblPlaca, gbc_lblPlaca);
-
-		txtPlaca = new JTextField();
-		txtPlaca.setEditable(false);
-		GridBagConstraints gbc_txtPlaca = new GridBagConstraints();
-		gbc_txtPlaca.insets = new Insets(0, 0, 5, 0);
-		gbc_txtPlaca.fill = GridBagConstraints.BOTH;
-		gbc_txtPlaca.gridx = 1;
-		gbc_txtPlaca.gridy = 9;
-		panelItemTable.add(txtPlaca, gbc_txtPlaca);
-		txtPlaca.setColumns(10);
-
-		JLabel lblInfoValores = new JLabel("Valores");
-		lblInfoValores.setFont(new Font("Calibri", Font.BOLD, 18));
-		GridBagConstraints gbc_lblInfoValores = new GridBagConstraints();
-		gbc_lblInfoValores.insets = new Insets(0, 0, 5, 5);
-		gbc_lblInfoValores.gridx = 0;
-		gbc_lblInfoValores.gridy = 10;
-		panelItemTable.add(lblInfoValores, gbc_lblInfoValores);
-
-		JLabel lblPrecoServicos = new JLabel("Servi\u00E7os");
-		GridBagConstraints gbc_lblPrecoServicos = new GridBagConstraints();
-		gbc_lblPrecoServicos.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblPrecoServicos.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPrecoServicos.gridx = 0;
-		gbc_lblPrecoServicos.gridy = 11;
-		panelItemTable.add(lblPrecoServicos, gbc_lblPrecoServicos);
-
-		txtValorServicos = new JTextField();
-		txtValorServicos.setEditable(false);
-		txtValorServicos.setColumns(10);
-		GridBagConstraints gbc_txtValorServicos = new GridBagConstraints();
-		gbc_txtValorServicos.insets = new Insets(0, 0, 5, 0);
-		gbc_txtValorServicos.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtValorServicos.gridx = 1;
-		gbc_txtValorServicos.gridy = 11;
-		panelItemTable.add(txtValorServicos, gbc_txtValorServicos);
-
-		JLabel lblPecas = new JLabel("Pe\u00E7as");
-		GridBagConstraints gbc_lblPecas = new GridBagConstraints();
-		gbc_lblPecas.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblPecas.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPecas.gridx = 0;
-		gbc_lblPecas.gridy = 12;
-		panelItemTable.add(lblPecas, gbc_lblPecas);
-
-		txtValorPecas = new JTextField();
-		txtValorPecas.setEditable(false);
-		txtValorPecas.setColumns(10);
-		GridBagConstraints gbc_txtValorPecas = new GridBagConstraints();
-		gbc_txtValorPecas.insets = new Insets(0, 0, 5, 0);
-		gbc_txtValorPecas.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtValorPecas.gridx = 1;
-		gbc_txtValorPecas.gridy = 12;
-		panelItemTable.add(txtValorPecas, gbc_txtValorPecas);
-
-		JLabel lblDesconto = new JLabel("Desconto");
-		GridBagConstraints gbc_lblDesconto = new GridBagConstraints();
-		gbc_lblDesconto.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblDesconto.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDesconto.gridx = 0;
-		gbc_lblDesconto.gridy = 13;
-		panelItemTable.add(lblDesconto, gbc_lblDesconto);
-
-		txtValorDesconto = new JTextField();
-		txtValorDesconto.setEditable(false);
-		txtValorDesconto.setColumns(10);
-		GridBagConstraints gbc_txtValorDesconto = new GridBagConstraints();
-		gbc_txtValorDesconto.insets = new Insets(0, 0, 5, 0);
-		gbc_txtValorDesconto.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtValorDesconto.gridx = 1;
-		gbc_txtValorDesconto.gridy = 13;
-		panelItemTable.add(txtValorDesconto, gbc_txtValorDesconto);
-
-		JLabel lblTotal = new JLabel("Total");
-		GridBagConstraints gbc_lblTotal = new GridBagConstraints();
-		gbc_lblTotal.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblTotal.insets = new Insets(0, 0, 0, 5);
-		gbc_lblTotal.gridx = 0;
-		gbc_lblTotal.gridy = 14;
-		panelItemTable.add(lblTotal, gbc_lblTotal);
-
-		txtValorTotal = new JTextField();
-		txtValorTotal.setEditable(false);
-		GridBagConstraints gbc_txtValorTotal = new GridBagConstraints();
-		gbc_txtValorTotal.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtValorTotal.gridx = 1;
-		gbc_txtValorTotal.gridy = 14;
-		panelItemTable.add(txtValorTotal, gbc_txtValorTotal);
-		txtValorTotal.setColumns(10);
-		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] { 0, 0, 0 };
-		gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gbl_panel_1.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_panel_1.rowWeights = new double[] { 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE };
-		panel_1.setLayout(gbl_panel_1);
-
-		JLabel lblCategoria = new JLabel("Categoria");
-		GridBagConstraints gbc_lblCategoria = new GridBagConstraints();
-		gbc_lblCategoria.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblCategoria.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCategoria.gridx = 0;
-		gbc_lblCategoria.gridy = 0;
-		panel_1.add(lblCategoria, gbc_lblCategoria);
-
-		GridBagConstraints gbc_cmbCategoria = new GridBagConstraints();
-		gbc_cmbCategoria.fill = GridBagConstraints.BOTH;
-		gbc_cmbCategoria.insets = new Insets(0, 0, 5, 0);
-		gbc_cmbCategoria.gridx = 1;
-		gbc_cmbCategoria.gridy = 0;
-		panel_1.add(cmbCategoria, gbc_cmbCategoria);
-
-		JLabel lblItem = new JLabel("Item");
-		GridBagConstraints gbc_lblItem = new GridBagConstraints();
-		gbc_lblItem.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblItem.insets = new Insets(0, 0, 5, 5);
-		gbc_lblItem.gridx = 0;
-		gbc_lblItem.gridy = 1;
-		panel_1.add(lblItem, gbc_lblItem);
-
-		GridBagConstraints gbc_cmbItem = new GridBagConstraints();
-		gbc_cmbItem.fill = GridBagConstraints.BOTH;
-		gbc_cmbItem.insets = new Insets(0, 0, 5, 0);
-		gbc_cmbItem.gridx = 1;
-		gbc_cmbItem.gridy = 1;
-		panel_1.add(cmbItem, gbc_cmbItem);
-
-		JLabel lblQuantidadeItem = new JLabel("Quantidade");
-		GridBagConstraints gbc_lblQuantidadeItem = new GridBagConstraints();
-		gbc_lblQuantidadeItem.fill = GridBagConstraints.BOTH;
-		gbc_lblQuantidadeItem.insets = new Insets(0, 0, 5, 5);
-		gbc_lblQuantidadeItem.gridx = 0;
-		gbc_lblQuantidadeItem.gridy = 2;
-		panel_1.add(lblQuantidadeItem, gbc_lblQuantidadeItem);
-		lblQuantidadeItem.setHorizontalAlignment(SwingConstants.LEFT);
-
-		txtQuantidadeItem = new JTextField();
-		GridBagConstraints gbc_txtQuantidadeItem = new GridBagConstraints();
-		gbc_txtQuantidadeItem.fill = GridBagConstraints.BOTH;
-		gbc_txtQuantidadeItem.insets = new Insets(0, 0, 5, 0);
-		gbc_txtQuantidadeItem.gridx = 1;
-		gbc_txtQuantidadeItem.gridy = 2;
-		panel_1.add(txtQuantidadeItem, gbc_txtQuantidadeItem);
-		txtQuantidadeItem.setColumns(10);
-
-		JLabel lblPrecoItem = new JLabel("Pre\u00E7o");
-		GridBagConstraints gbc_lblPrecoItem = new GridBagConstraints();
-		gbc_lblPrecoItem.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblPrecoItem.insets = new Insets(0, 0, 0, 5);
-		gbc_lblPrecoItem.gridx = 0;
-		gbc_lblPrecoItem.gridy = 3;
-		panel_1.add(lblPrecoItem, gbc_lblPrecoItem);
-		lblPrecoItem.setHorizontalAlignment(SwingConstants.LEFT);
-
-		txtPrecoItem = new JTextField();
-		GridBagConstraints gbc_txtPrecoItem = new GridBagConstraints();
-		gbc_txtPrecoItem.fill = GridBagConstraints.BOTH;
-		gbc_txtPrecoItem.gridx = 1;
-		gbc_txtPrecoItem.gridy = 3;
-		panel_1.add(txtPrecoItem, gbc_txtPrecoItem);
-		txtPrecoItem.setColumns(10);
+		JPanel panelItemButton = new JPanel();
 		GridBagLayout gbl_panelItemButton = new GridBagLayout();
 		gbl_panelItemButton.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gbl_panelItemButton.rowHeights = new int[] { 0, 0 };
@@ -590,23 +398,268 @@ public class ServicosView extends JFrame {
 		gbc_btnAddItem.gridx = 3;
 		gbc_btnAddItem.gridy = 0;
 		panelItemButton.add(btnAddItem, gbc_btnAddItem);
-		panelItemBody.setLayout(gl_panelItemBody);
-		GridBagLayout gbl_panelItemHeader = new GridBagLayout();
-		gbl_panelItemHeader.columnWidths = new int[] { 0, 0 };
-		gbl_panelItemHeader.rowHeights = new int[] { 0, 0 };
-		gbl_panelItemHeader.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_panelItemHeader.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
-		panelItemHeader.setLayout(gbl_panelItemHeader);
-
-		JLabel lblItemOS = new JLabel("Itens da OS");
-		lblItemOS.setFont(new Font("Calibri", Font.BOLD, 22));
-		GridBagConstraints gbc_lblItemOS = new GridBagConstraints();
-		gbc_lblItemOS.anchor = GridBagConstraints.WEST;
-		gbc_lblItemOS.fill = GridBagConstraints.VERTICAL;
-		gbc_lblItemOS.gridx = 0;
-		gbc_lblItemOS.gridy = 0;
-		panelItemHeader.add(lblItemOS, gbc_lblItemOS);
+		GroupLayout gl_panelItem = new GroupLayout(panelItem);
+		gl_panelItem.setHorizontalGroup(gl_panelItem.createParallelGroup(Alignment.LEADING)
+				.addComponent(panelItemButton, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+				.addComponent(scrollPaneItem, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+				.addComponent(panelItemForm, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+				.addComponent(lblItemOS, GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE));
+		gl_panelItem.setVerticalGroup(gl_panelItem.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelItem.createSequentialGroup()
+						.addComponent(lblItemOS, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panelItemForm, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(scrollPaneItem, GroupLayout.PREFERRED_SIZE, 345, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+						.addComponent(panelItemButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)));
 		panelItem.setLayout(gl_panelItem);
+
+		JLabel lblInfoOS = new JLabel("Informa\u00E7\u00F5es OS");
+		lblInfoOS.setFont(new Font("Calibri", Font.BOLD, 22));
+
+		JPanel panelInfoBody = new JPanel();
+		GridBagLayout gbl_panelInfoBody = new GridBagLayout();
+		gbl_panelInfoBody.columnWidths = new int[] { 0, 0, 0 };
+		gbl_panelInfoBody.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panelInfoBody.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelInfoBody.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, Double.MIN_VALUE };
+		panelInfoBody.setLayout(gbl_panelInfoBody);
+
+		JLabel lblInfoCliente = new JLabel("Cliente");
+		lblInfoCliente.setFont(new Font("Calibri", Font.BOLD, 18));
+		GridBagConstraints gbc_lblInfoCliente = new GridBagConstraints();
+		gbc_lblInfoCliente.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblInfoCliente.insets = new Insets(0, 0, 5, 5);
+		gbc_lblInfoCliente.gridx = 0;
+		gbc_lblInfoCliente.gridy = 0;
+		panelInfoBody.add(lblInfoCliente, gbc_lblInfoCliente);
+
+		JLabel lblClienteNome = new JLabel("Nome");
+		GridBagConstraints gbc_lblClienteNome = new GridBagConstraints();
+		gbc_lblClienteNome.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblClienteNome.insets = new Insets(0, 0, 5, 5);
+		gbc_lblClienteNome.gridx = 0;
+		gbc_lblClienteNome.gridy = 1;
+		panelInfoBody.add(lblClienteNome, gbc_lblClienteNome);
+
+		txtNomeCliente = new JTextField();
+		txtNomeCliente.setEditable(false);
+		GridBagConstraints gbc_txtNomeCliente = new GridBagConstraints();
+		gbc_txtNomeCliente.insets = new Insets(0, 0, 5, 0);
+		gbc_txtNomeCliente.fill = GridBagConstraints.BOTH;
+		gbc_txtNomeCliente.gridx = 1;
+		gbc_txtNomeCliente.gridy = 1;
+		panelInfoBody.add(txtNomeCliente, gbc_txtNomeCliente);
+		txtNomeCliente.setColumns(10);
+
+		JLabel lblClienteTelefone = new JLabel("Telefone");
+		GridBagConstraints gbc_lblClienteTelefone = new GridBagConstraints();
+		gbc_lblClienteTelefone.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblClienteTelefone.insets = new Insets(0, 0, 5, 5);
+		gbc_lblClienteTelefone.gridx = 0;
+		gbc_lblClienteTelefone.gridy = 2;
+		panelInfoBody.add(lblClienteTelefone, gbc_lblClienteTelefone);
+
+		txtTelefoneCliente = new JTextField();
+		txtTelefoneCliente.setEditable(false);
+		GridBagConstraints gbc_txtTelefoneCliente = new GridBagConstraints();
+		gbc_txtTelefoneCliente.insets = new Insets(0, 0, 5, 0);
+		gbc_txtTelefoneCliente.fill = GridBagConstraints.BOTH;
+		gbc_txtTelefoneCliente.gridx = 1;
+		gbc_txtTelefoneCliente.gridy = 2;
+		panelInfoBody.add(txtTelefoneCliente, gbc_txtTelefoneCliente);
+		txtTelefoneCliente.setColumns(10);
+
+		JLabel lblClienteEmail = new JLabel("Email");
+		GridBagConstraints gbc_lblClienteEmail = new GridBagConstraints();
+		gbc_lblClienteEmail.insets = new Insets(0, 0, 5, 5);
+		gbc_lblClienteEmail.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblClienteEmail.gridx = 0;
+		gbc_lblClienteEmail.gridy = 3;
+		panelInfoBody.add(lblClienteEmail, gbc_lblClienteEmail);
+
+		txtEmailCliente = new JTextField();
+		txtEmailCliente.setEditable(false);
+		GridBagConstraints gbc_txtEmailCliente = new GridBagConstraints();
+		gbc_txtEmailCliente.insets = new Insets(0, 0, 5, 0);
+		gbc_txtEmailCliente.fill = GridBagConstraints.BOTH;
+		gbc_txtEmailCliente.gridx = 1;
+		gbc_txtEmailCliente.gridy = 3;
+		panelInfoBody.add(txtEmailCliente, gbc_txtEmailCliente);
+		txtEmailCliente.setColumns(10);
+
+		JLabel lblInfoVeiculo = new JLabel("Ve\u00EDculo");
+		lblInfoVeiculo.setFont(new Font("Calibri", Font.BOLD, 18));
+		GridBagConstraints gbc_lblInfoVeiculo = new GridBagConstraints();
+		gbc_lblInfoVeiculo.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblInfoVeiculo.insets = new Insets(0, 0, 5, 5);
+		gbc_lblInfoVeiculo.gridx = 0;
+		gbc_lblInfoVeiculo.gridy = 5;
+		panelInfoBody.add(lblInfoVeiculo, gbc_lblInfoVeiculo);
+
+		JLabel lblModelo = new JLabel("Modelo");
+		GridBagConstraints gbc_lblModelo = new GridBagConstraints();
+		gbc_lblModelo.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblModelo.insets = new Insets(0, 0, 5, 5);
+		gbc_lblModelo.gridx = 0;
+		gbc_lblModelo.gridy = 6;
+		panelInfoBody.add(lblModelo, gbc_lblModelo);
+
+		txtModelo = new JTextField();
+		txtModelo.setEditable(false);
+		GridBagConstraints gbc_txtModelo = new GridBagConstraints();
+		gbc_txtModelo.insets = new Insets(0, 0, 5, 0);
+		gbc_txtModelo.fill = GridBagConstraints.BOTH;
+		gbc_txtModelo.gridx = 1;
+		gbc_txtModelo.gridy = 6;
+		panelInfoBody.add(txtModelo, gbc_txtModelo);
+		txtModelo.setColumns(10);
+
+		JLabel lblAno = new JLabel("Ano");
+		GridBagConstraints gbc_lblAno = new GridBagConstraints();
+		gbc_lblAno.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblAno.insets = new Insets(0, 0, 5, 5);
+		gbc_lblAno.gridx = 0;
+		gbc_lblAno.gridy = 7;
+		panelInfoBody.add(lblAno, gbc_lblAno);
+
+		txtAno = new JTextField();
+		txtAno.setEditable(false);
+		GridBagConstraints gbc_txtAno = new GridBagConstraints();
+		gbc_txtAno.insets = new Insets(0, 0, 5, 0);
+		gbc_txtAno.fill = GridBagConstraints.BOTH;
+		gbc_txtAno.gridx = 1;
+		gbc_txtAno.gridy = 7;
+		panelInfoBody.add(txtAno, gbc_txtAno);
+		txtAno.setColumns(10);
+
+		JLabel lblCor = new JLabel("Cor");
+		GridBagConstraints gbc_lblCor = new GridBagConstraints();
+		gbc_lblCor.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblCor.insets = new Insets(0, 0, 5, 5);
+		gbc_lblCor.gridx = 0;
+		gbc_lblCor.gridy = 8;
+		panelInfoBody.add(lblCor, gbc_lblCor);
+
+		txtCor = new JTextField();
+		txtCor.setEditable(false);
+		GridBagConstraints gbc_txtCor = new GridBagConstraints();
+		gbc_txtCor.insets = new Insets(0, 0, 5, 0);
+		gbc_txtCor.fill = GridBagConstraints.BOTH;
+		gbc_txtCor.gridx = 1;
+		gbc_txtCor.gridy = 8;
+		panelInfoBody.add(txtCor, gbc_txtCor);
+		txtCor.setColumns(10);
+
+		JLabel lblPlaca = new JLabel("Placa");
+		GridBagConstraints gbc_lblPlaca = new GridBagConstraints();
+		gbc_lblPlaca.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblPlaca.insets = new Insets(0, 0, 5, 5);
+		gbc_lblPlaca.gridx = 0;
+		gbc_lblPlaca.gridy = 9;
+		panelInfoBody.add(lblPlaca, gbc_lblPlaca);
+
+		txtPlaca = new JTextField();
+		txtPlaca.setEditable(false);
+		GridBagConstraints gbc_txtPlaca = new GridBagConstraints();
+		gbc_txtPlaca.insets = new Insets(0, 0, 5, 0);
+		gbc_txtPlaca.fill = GridBagConstraints.BOTH;
+		gbc_txtPlaca.gridx = 1;
+		gbc_txtPlaca.gridy = 9;
+		panelInfoBody.add(txtPlaca, gbc_txtPlaca);
+		txtPlaca.setColumns(10);
+
+		JLabel lblInfoValores = new JLabel("Valores");
+		lblInfoValores.setFont(new Font("Calibri", Font.BOLD, 18));
+		GridBagConstraints gbc_lblInfoValores = new GridBagConstraints();
+		gbc_lblInfoValores.insets = new Insets(0, 0, 5, 5);
+		gbc_lblInfoValores.gridx = 0;
+		gbc_lblInfoValores.gridy = 11;
+		panelInfoBody.add(lblInfoValores, gbc_lblInfoValores);
+
+		JLabel lblPrecoServicos = new JLabel("Servi\u00E7os");
+		GridBagConstraints gbc_lblPrecoServicos = new GridBagConstraints();
+		gbc_lblPrecoServicos.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblPrecoServicos.insets = new Insets(0, 0, 5, 5);
+		gbc_lblPrecoServicos.gridx = 0;
+		gbc_lblPrecoServicos.gridy = 12;
+		panelInfoBody.add(lblPrecoServicos, gbc_lblPrecoServicos);
+
+		txtValorServicos = new JTextField();
+		txtValorServicos.setEditable(false);
+		txtValorServicos.setColumns(10);
+		GridBagConstraints gbc_txtValorServicos = new GridBagConstraints();
+		gbc_txtValorServicos.insets = new Insets(0, 0, 5, 0);
+		gbc_txtValorServicos.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtValorServicos.gridx = 1;
+		gbc_txtValorServicos.gridy = 12;
+		panelInfoBody.add(txtValorServicos, gbc_txtValorServicos);
+
+		JLabel lblPecas = new JLabel("Pe\u00E7as");
+		GridBagConstraints gbc_lblPecas = new GridBagConstraints();
+		gbc_lblPecas.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblPecas.insets = new Insets(0, 0, 5, 5);
+		gbc_lblPecas.gridx = 0;
+		gbc_lblPecas.gridy = 13;
+		panelInfoBody.add(lblPecas, gbc_lblPecas);
+
+		txtValorPecas = new JTextField();
+		txtValorPecas.setEditable(false);
+		txtValorPecas.setColumns(10);
+		GridBagConstraints gbc_txtValorPecas = new GridBagConstraints();
+		gbc_txtValorPecas.insets = new Insets(0, 0, 5, 0);
+		gbc_txtValorPecas.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtValorPecas.gridx = 1;
+		gbc_txtValorPecas.gridy = 13;
+		panelInfoBody.add(txtValorPecas, gbc_txtValorPecas);
+
+		JLabel lblDesconto = new JLabel("Desconto");
+		GridBagConstraints gbc_lblDesconto = new GridBagConstraints();
+		gbc_lblDesconto.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblDesconto.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDesconto.gridx = 0;
+		gbc_lblDesconto.gridy = 14;
+		panelInfoBody.add(lblDesconto, gbc_lblDesconto);
+
+		txtValorDesconto = new JTextField();
+		txtValorDesconto.setEditable(false);
+		txtValorDesconto.setColumns(10);
+		GridBagConstraints gbc_txtValorDesconto = new GridBagConstraints();
+		gbc_txtValorDesconto.insets = new Insets(0, 0, 5, 0);
+		gbc_txtValorDesconto.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtValorDesconto.gridx = 1;
+		gbc_txtValorDesconto.gridy = 14;
+		panelInfoBody.add(txtValorDesconto, gbc_txtValorDesconto);
+
+		JLabel lblTotal = new JLabel("Total");
+		GridBagConstraints gbc_lblTotal = new GridBagConstraints();
+		gbc_lblTotal.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblTotal.insets = new Insets(0, 0, 0, 5);
+		gbc_lblTotal.gridx = 0;
+		gbc_lblTotal.gridy = 15;
+		panelInfoBody.add(lblTotal, gbc_lblTotal);
+
+		txtValorTotal = new JTextField();
+		txtValorTotal.setEditable(false);
+		GridBagConstraints gbc_txtValorTotal = new GridBagConstraints();
+		gbc_txtValorTotal.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtValorTotal.gridx = 1;
+		gbc_txtValorTotal.gridy = 15;
+		panelInfoBody.add(txtValorTotal, gbc_txtValorTotal);
+		txtValorTotal.setColumns(10);
+		GroupLayout gl_panelInfoOS = new GroupLayout(panelInfoOS);
+		gl_panelInfoOS.setHorizontalGroup(gl_panelInfoOS.createParallelGroup(Alignment.LEADING)
+				.addComponent(lblInfoOS, GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
+				.addComponent(panelInfoBody, GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE));
+		gl_panelInfoOS.setVerticalGroup(gl_panelInfoOS.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelInfoOS.createSequentialGroup()
+						.addComponent(lblInfoOS, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panelInfoBody, GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)));
+		panelInfoOS.setLayout(gl_panelInfoOS);
 
 		JPanel panelServicosHeader = new JPanel();
 
@@ -765,6 +818,12 @@ public class ServicosView extends JFrame {
 		gbc_scrollPaneServicos.gridy = 0;
 		panelServicosTable.add(scrollPaneServicos, gbc_scrollPaneServicos);
 
+		tableServicos.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				selecionarServico();
+			}
+		});
 		scrollPaneServicos.setViewportView(tableServicos);
 
 		GridBagLayout gbl_panelServicosHeader = new GridBagLayout();

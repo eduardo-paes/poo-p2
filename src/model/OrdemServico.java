@@ -1,8 +1,6 @@
 package model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -26,6 +24,7 @@ public class OrdemServico implements Serializable {
 
 	private IVeiculo veiculo;
 	private ICliente cliente;
+
 	private IFuncionario consultor;
 	private ArrayList<ItemOS> itens;
 
@@ -36,6 +35,14 @@ public class OrdemServico implements Serializable {
 		this.veiculo = veiculo;
 		this.cliente = veiculo.getProprietario();
 		this.kmAtual = quilometragem;
+	}
+
+	public int getNumero() {
+		return numero;
+	}
+
+	public Date getDataEntrada() {
+		return dataEntrada;
 	}
 
 	public String getDescricao() {
@@ -106,48 +113,38 @@ public class OrdemServico implements Serializable {
 		return getTotalServicos() + getTotalPecas();
 	}
 
-	public StringBuilder listarOS() {
-		StringBuilder sb = new StringBuilder();
-		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	public Object[] listarOS() {
+		double valorServicos = this.getTotalServicos(), valorPecas = this.getTotalPecas(), desconto = 0;
+		double valorTotal = valorPecas + valorServicos;
+		Object[] row = new Object[11];
 
-		sb.append("\n::::::: Ordem de Serviço (" + numero + "):");
-		sb.append("\n\tData de Entrada: " + df.format(dataEntrada));
-
-		sb.append("\n\t:: Dados do Cliente");
-		sb.append("\n\t\tNome: " + cliente.getNome());
-		sb.append("\n\t\tTelefone: " + cliente.getTelefone());
-		sb.append("\n\t\tE-mail: " + cliente.getEmail());
-
-		sb.append("\n\t:: Dados do Veículo");
-		sb.append("\n\t\tModelo: " + veiculo.getModelo().getNome());
-		sb.append("\n\t\tAno: " + veiculo.getAno());
-		sb.append("\n\t\tCor: " + veiculo.getCor());
-		sb.append("\n\t\tPlaca: " + veiculo.getPlaca());
-
-		sb.append("\n\t:: Itens Associados");
-		int i = 1;
-		double valorServicos = this.getTotalServicos(), valorPecas = this.getTotalPecas(), valorTotal = 0;
-
-		for (ItemOS item : itens) {
-			sb.append("\n\t\t" + (i++) + ".\tTipo: " + item.getTipo().getName() + "\t| Cód.: TODO "
-					+ "\t| Descrição: TODO \t| Quantidade: " + item.getQuantidade() + "\t| Valor: R$ "
-					+ String.format("%.2f", item.getPreco()));
+		String nomeCliente = "", emailCliente = "";
+		long telefoneCliente = 0;
+		
+		if (cliente != null) {
+			nomeCliente = cliente.getNome();
+			telefoneCliente = cliente.getTelefone();
+			emailCliente = cliente.getEmail();
+			
+			if (cliente.isPlatinum()) {
+				desconto = valorServicos;
+				valorTotal = valorPecas;
+			}
 		}
 
-		sb.append("\n\t:: Valores");
-		sb.append("\n\t\tValor dos Serviços: R$ " + String.format("%.2f", valorServicos));
-		sb.append("\n\t\tValor das Peças: R$ " + String.format("%.2f", valorPecas));
+		row[0] = nomeCliente;
+		row[1] = telefoneCliente;
+		row[2] = emailCliente;
+		row[3] = veiculo.getModelo().getNome();
+		row[4] = veiculo.getAno();
+		row[5] = veiculo.getCor();
+		row[6] = veiculo.getPlaca();
+		row[7] = String.format("%.2f", valorServicos);
+		row[8] = String.format("%.2f", valorPecas);
+		row[9] = String.format("%.2f", desconto);
+		row[10] = String.format("%.2f", valorTotal);
 
-		if (cliente.isPlatinum()) {
-			sb.append("\n\t\tDesconto Platinum: R$ " + String.format("%.2f", valorServicos));
-			valorTotal = valorPecas;
-		} else {
-			valorTotal = valorPecas + valorServicos;
-		}
-
-		sb.append("\n\t\tValor Total: R$ " + String.format("%.2f", valorTotal));
-
-		return sb;
+		return row;
 	}
 
 }

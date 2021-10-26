@@ -1,13 +1,10 @@
 package controller;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import model.Cidade;
 import model.Endereco;
 import model.Funcionario;
-import model.interfaces.IFuncionario;
 import persistence.FuncionarioPersistence;
 
 public class FuncionarioController {
@@ -19,13 +16,13 @@ public class FuncionarioController {
 		funcionarioPersistence = new FuncionarioPersistence();
 		funcionarios = funcionarioPersistence.extraiDadosArquivo();
 	}
-	
+
 	public static FuncionarioController getInstance() {
 		if (instance == null)
 			instance = new FuncionarioController();
 		return instance;
 	}
-	
+
 	public ArrayList<Object[]> listarFuncionarios() {
 
 		ArrayList<Object[]> rows = new ArrayList<Object[]>();
@@ -46,16 +43,6 @@ public class FuncionarioController {
 		}
 
 		return rows;
-	}
-
-	public Map<Long, String> listarProprietarios() {
-		Map<Long, String> proprietarios = new LinkedHashMap<Long, String>();
-
-		for (IFuncionario f : funcionarios) {
-			proprietarios.put(f.getCpf(), f.getNome());
-		}
-
-		return proprietarios;
 	}
 
 	public int salvaFuncionario(String nome, long cpf, long telefone, String email, String logradouro, int numero,
@@ -120,6 +107,15 @@ public class FuncionarioController {
 			funcionarios.remove(id);
 			funcionarioPersistence.salvaDadosArquivo(funcionarios);
 		}
+	}
+
+	public Funcionario encontraFuncionario(int matricula) {
+		for (Funcionario funcionario : funcionarios) {
+			if (funcionario.getMatricula() == matricula) {
+				return funcionario;
+			}
+		}
+		return null;
 	}
 
 }

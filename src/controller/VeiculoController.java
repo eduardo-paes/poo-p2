@@ -90,5 +90,23 @@ public class VeiculoController {
 			persistence.salvaDadosArquivo(veiculos);
 		}
 	}
+	
+	public Veiculo encontraVeiculo(String chassi) {
+		for (Veiculo veiculo : veiculos) {
+			if (veiculo.getChassi().equals(chassi)) {
+				return veiculo;
+			}
+		}
+		return null;
+	}
+	
+	public String encontraProprietario(String chassi)
+	{
+		Veiculo veiculo = encontraVeiculo(chassi);
+		if (veiculo != null && veiculo.getProprietario() != null) {
+			return veiculo.getProprietario().getNome();
+		}
+		return null;
+	}
 
 }
