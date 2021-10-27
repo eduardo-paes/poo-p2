@@ -77,11 +77,11 @@ public class OrdemServico implements Serializable {
 		return cliente;
 	}
 
-	public void addItem(IItem item, int qtde, double preco) {
+	public void addItem(IItem item, double qtde, double preco) {
 		itens.add(new ItemOS(item, qtde, preco));
 	}
 
-	public void addItem(IItem item, int qtde) {
+	public void addItem(IItem item, double qtde) {
 		itens.add(new ItemOS(item, qtde));
 	}
 
@@ -111,6 +111,10 @@ public class OrdemServico implements Serializable {
 
 	public double getTotalOS() {
 		return getTotalServicos() + getTotalPecas();
+	}
+	
+	public ArrayList<ItemOS> listarItensOS(){
+		return itens;
 	}
 
 	public Object[] listarOS() {

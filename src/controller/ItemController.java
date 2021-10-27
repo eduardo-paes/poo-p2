@@ -35,7 +35,7 @@ public class ItemController {
 		return tipos;
 	}
 	
-	private Item encontrarItem(long codigo) {
+	public Item encontrarItem(long codigo) {
 		Item item = null;
 		for (Item i : itens) {
 			System.out.println(i.getCodigo());
@@ -45,6 +45,18 @@ public class ItemController {
 			}
 		}
 		return item;
+	}
+	
+	public Object[] listarItem(long codigo) {
+		Object[] row = new Object[1];
+		Item item = encontrarItem(codigo);
+		if (item != null) {
+			row[0] = item.getCodigo();
+			row[1] = item.getTipo().getName();
+			row[2] = item.getDescricao();
+			row[3] = item.getPreco();
+		}
+		return row;
 	}
 
 	public long salvarItem(String descricao, String tipoItem, double preco, int categoriaId) {

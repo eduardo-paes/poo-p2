@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import model.Categoria;
 import model.Item;
+import model.interfaces.IItem;
 import persistence.CategoriaPersistence;
 
 public class CategoriaController {
@@ -22,38 +23,19 @@ public class CategoriaController {
 		return instance;
 	}
 
-	public ArrayList<Object[]> listarCategorias() {
-		ArrayList<Object[]> rows = new ArrayList<Object[]>();
-		for (Categoria c : categorias) {
-			Object[] row = new Object[1];
-			row[0] = c.getNome();
-			rows.add(row);
-		}
-		return rows;
-	}
-
-	public ArrayList<Object[]> listarItensCategoria(int id) {
-		ArrayList<Object[]> rows = new ArrayList<Object[]>();
-		if (id >= 0) {
-			Categoria categoria = (Categoria) categorias.get(id);
-			rows = categoria.listarItens();
-		}
-		return rows;
-	}
-
 	public void salvaCategoria(String nome) {
-		if (!nome.isBlank() ) {
+		if (!nome.isBlank()) {
 			Categoria categoria = new Categoria(nome);
 			categorias.add(categoria);
 		}
 	}
-	
+
 	public void removeCategoria(int id) {
 		if (id >= 0 && id <= categorias.size()) {
 			categorias.remove(id);
 			categoriaPersistence.salvaDadosArquivo(categorias);
 		}
-	}	
+	}
 
 	public void addItem(int categoriaId, Item item) {
 
@@ -68,21 +50,68 @@ public class CategoriaController {
 
 		if (categoriaId >= 0 && categoriaId <= categorias.size()) {
 			Categoria categoria = (Categoria) categorias.get(categoriaId);
-			System.out.println(item);
 			categoria.removeItem(item);
 			categoriaPersistence.salvaDadosArquivo(categorias);
-			System.out.println("Item removido da categoria.");
 		}
 	}
-	
+
 	public void editarItem(int categoriaId, Item item) {
 		if (categoriaId >= 0 && categoriaId <= categorias.size()) {
 			Categoria categoria = (Categoria) categorias.get(categoriaId);
 			categoria.removeItem(item);
 			categoria.addItem(item);
 			categoriaPersistence.salvaDadosArquivo(categorias);
-			System.out.println("Item editado na categoria.");
 		}
 	}
-		
+
+	public ArrayList<Object[]> listarCategorias() {
+		ArrayList<Object[]> rows = new ArrayList<Object[]>();
+		for (Categoria c : categorias) {
+			Object[] row = new Object[1];
+			row[0] = c.getNome();
+			rows.add(row);
+		}
+		return rows;
+	}
+	
+	public ArrayList<Object[]> listarItensCategoria(int index) {
+		ArrayList<Object[]> rows = new ArrayList<Object[]>();
+		Categoria categoria = categorias.get(index);
+
+		if (categoria != null) {
+			for (IItem item : categoria.listarItens()) {
+				Object[] row = new Object[4];
+				row[0] = item.getCodigo();
+				row[1] = item.getTipo().getName();
+				row[2] = item.getDescricao();
+				row[3] = String.format("%.2f", item.getPreco());
+				rows.add(row);
+			}
+		}
+
+		return rows;
+	}
+
+	public Item encontraCategoriaItem(int categoriaId, int itemId) {
+		if (categoriaId >= 0 && itemId >= 0) {
+			return (Item)categorias.get(categoriaId).listarItens().get(itemId);
+		}
+		return null;
+	}
+	
+	public int encontraCategoriaPeloItem(long codigoItem) {
+		int index = -1;
+		if (codigoItem >= 1) {
+			for (Categoria categoria : categorias) {
+				index++;
+				for (IItem item : categoria.listarItens()) {
+					if (item.getCodigo() == codigoItem) {
+						return index;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
 }

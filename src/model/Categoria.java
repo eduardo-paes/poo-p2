@@ -32,18 +32,8 @@ public class Categoria implements Serializable {
 		}
 	}
 
-	public ArrayList<Object[]> listarItens() {
-		ArrayList<Object[]> rows = new ArrayList<Object[]>();
-
-		for (IItem item : itens) {
-			Object[] row = new Object[4];
-			row[0] = item.getCodigo();
-			row[1] = item.getTipo().getName();
-			row[2] = item.getDescricao();
-			row[3] = String.format("%.2f", item.getPreco());
-			rows.add(row);
-		}
-		return rows;
+	public ArrayList<IItem> listarItens() {
+		return itens;
 	}
 
 }

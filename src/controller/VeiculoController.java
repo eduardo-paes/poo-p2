@@ -46,7 +46,7 @@ public class VeiculoController {
 		return rows;
 	}
 
-	public void salvaVeiculo(String chassi, int ano, String cor, String placa, String nomeModelo, String cpfCliente) {
+	public void salvaVeiculo(String chassi, int ano, String cor, String placa, String nomeModelo, long cpfCliente) {
 		Modelo modelo = new Modelo(nomeModelo);
 		Veiculo veiculo;
 
@@ -56,15 +56,12 @@ public class VeiculoController {
 			veiculo = new Veiculo(modelo, chassi, ano, cor, placa);
 		}
 
-		// TODO: Salvar Proprietario
-		if (cpfCliente.length() > 0) {
-			veiculo.setProprietario(null);
-		}
+		veiculo.setProprietario(ClienteController.getInstance().encontraCliente(cpfCliente));
 		veiculos.add(veiculo);
 		persistence.salvaDadosArquivo(veiculos);
 	}
 
-	public void editaVeiculo(int id, String cor, String placa, String cpfCliente) {
+	public void editaVeiculo(int id, String cor, String placa, long cpfCliente) {
 
 		if (id >= 0 && id <= veiculos.size()) {
 			Veiculo veiculo = veiculos.get(id);
@@ -76,10 +73,7 @@ public class VeiculoController {
 				veiculo.setCor(cor);
 			}
 
-			// TODO: Editar Proprietario
-			if (cpfCliente.length() > 0) {
-				veiculo.setProprietario(null);
-			}
+			veiculo.setProprietario(ClienteController.getInstance().encontraCliente(cpfCliente));
 			persistence.salvaDadosArquivo(veiculos);
 		}
 	}

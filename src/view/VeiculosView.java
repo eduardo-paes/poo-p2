@@ -59,10 +59,13 @@ public class VeiculosView extends JFrame {
 			try {
 				int ano = Integer.parseInt(txtAno.getText());
 
-				String cpfProprietario = "";
+				long cpfProprietario = 0;
 				if (cmbProprietario.getSelectedItem() != null) {
-					cpfProprietario = cmbProprietario.getSelectedItem().toString();
+					String str = cmbProprietario.getSelectedItem().toString();
+					str = str.substring(str.indexOf('-') + 2);
+					cpfProprietario = Long.parseLong(str);
 				}
+				
 				VeiculoController.getInstance().salvaVeiculo(txtChassi.getText(), ano, txtCor.getText(), txtPlaca.getText(),
 						txtModelo.getText(), cpfProprietario);
 
@@ -87,9 +90,11 @@ public class VeiculosView extends JFrame {
 	private void editarModelo() {
 		int i = tableVeiculo.getSelectedRow();
 		if (i >= 0) {
-			String cpfProprietario = "";
+			long cpfProprietario = 0;
 			if (cmbProprietario.getSelectedItem() != null) {
-				cpfProprietario = cmbProprietario.getSelectedItem().toString();
+				String str = cmbProprietario.getSelectedItem().toString();
+				str = str.substring(str.indexOf('-') + 2);
+				cpfProprietario = Long.parseLong(str);
 			}
 
 			VeiculoController.getInstance().editaVeiculo(i, txtCor.getText(), txtPlaca.getText(), cpfProprietario);
@@ -156,9 +161,8 @@ public class VeiculosView extends JFrame {
 		cmbProprietario = new JComboBox<String>();
 		
 		for (Map.Entry<Long, String> entry : proprietarios.entrySet()) {
-			String proprietario = entry.getValue().toString();
-			System.out.println(proprietario);
-			cmbProprietario.addItem(proprietario);
+			String str = String.format("%s - %d", entry.getValue().toString(), entry.getKey());
+			cmbProprietario.addItem(str);
 		}
 
 		for (Object[] row : VeiculoController.getInstance().listarVeiculos()) {

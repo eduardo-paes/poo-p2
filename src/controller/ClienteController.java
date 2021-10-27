@@ -122,4 +122,14 @@ public class ClienteController {
 		}
 	}
 
+	public Cliente encontraCliente(long cpf) {
+		if (cpf >= 0) {
+			for (Cliente cliente : clientes) {
+				if (cliente.getCpf() == cpf) {
+					return cliente;
+				}
+			}
+		}	
+		return null;
+	}
 }

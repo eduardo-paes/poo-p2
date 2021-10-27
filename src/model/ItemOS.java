@@ -42,13 +42,17 @@ public class ItemOS implements Serializable {
 		return quantidade * preco;
 	}
 
-	public String listarItem() {
-		// TODO: Implementar Listar Item
-		return item.toString();
-	}
-
 	public ETipoItem getTipo() {
 		return item.getTipo();
+	}
+	
+	//--Metodos Suplementares
+	public long getCodigo() {
+		return item.getCodigo();
+	}
+	
+	public String getDescricao() {
+		return item.getDescricao();
 	}
 
 }

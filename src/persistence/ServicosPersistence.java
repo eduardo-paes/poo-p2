@@ -49,6 +49,7 @@ public class ServicosPersistence {
 		try {
 			output = new ObjectOutputStream(new FileOutputStream(arquivoDados));
 			output.writeObject(servicos);
+			System.out.println("OS Salvas");
 		} catch (IOException e) {
 			System.err.println("Erro ao escrever no arquivo: " + e.getMessage().toString());
 		} finally {

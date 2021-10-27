@@ -6,9 +6,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.GroupLayout;
@@ -31,6 +34,8 @@ import controller.CategoriaController;
 import controller.FuncionarioController;
 import controller.ServicosController;
 import controller.VeiculoController;
+import model.Item;
+import model.ItemOS;
 
 public class ServicosView extends JFrame {
 
@@ -38,6 +43,10 @@ public class ServicosView extends JFrame {
 
 	private DefaultTableModel tableModelServicos;
 	private DefaultTableModel tableModelItens;
+
+	private ArrayList<String> veiculos;
+	private ArrayList<String> funcionarios;
+	private ArrayList<String> itensCategoria;
 
 	private JPanel contentPane;
 	private JTable tableServicos;
@@ -63,7 +72,46 @@ public class ServicosView extends JFrame {
 	private JTextField txtValorPecas;
 	private JTextField txtValorServicos;
 
-	public void limparFormularioServico() {
+	public ServicosView() {
+		preenchimentoInicial();
+		initialize();
+	}
+
+	// --INFO OS
+	private void limparInfoOS() {
+		txtNomeCliente.setText("");
+		txtTelefoneCliente.setText("");
+		txtEmailCliente.setText("");
+		txtModelo.setText("");
+		txtAno.setText("");
+		txtCor.setText("");
+		txtPlaca.setText("");
+		txtValorTotal.setText("");
+		txtValorDesconto.setText("");
+		txtValorPecas.setText("");
+		txtValorServicos.setText("");
+	}
+
+	private void preencheInfoOS() {
+		int i = tableServicos.getSelectedRow();
+		Object[] info = ServicosController.getInstance().listarInfoOS(i);
+
+		int index = 0;
+		txtNomeCliente.setText(info[index++].toString());
+		txtTelefoneCliente.setText(info[index++].toString());
+		txtEmailCliente.setText(info[index++].toString());
+		txtModelo.setText(info[index++].toString());
+		txtAno.setText(info[index++].toString());
+		txtCor.setText(info[index++].toString());
+		txtPlaca.setText(info[index++].toString());
+		txtValorServicos.setText(info[index++].toString());
+		txtValorPecas.setText(info[index++].toString());
+		txtValorDesconto.setText(info[index++].toString());
+		txtValorTotal.setText(info[index++].toString());
+	}
+
+	// --OS
+	private void limparFormularioServico() {
 		cmbFuncionario.setSelectedIndex(-1);
 		cmbVeiculo.setSelectedIndex(-1);
 		txtKmAtual.setText("");
@@ -71,15 +119,46 @@ public class ServicosView extends JFrame {
 		tableServicos.clearSelection();
 	}
 
-	public void removerServico() {
-
+	private void removerServico() {
+		int i = tableServicos.getSelectedRow();
+		if (i >= 0) {
+			tableModelServicos.removeRow(i);
+			ServicosController.getInstance().removerServico(i);
+			limparFormularioServico();
+			limparInfoOS();
+		}
 	}
 
-	public void editarServico() {
+	private void editarServico() {
+		int i = tableServicos.getSelectedRow();
+		if (i >= 0) {
 
+			try {
+				int kmAtual = Integer.parseInt(txtKmAtual.getText());
+				int matriculaFuncionario = 0;
+
+				if (cmbFuncionario.getSelectedIndex() != -1) {
+					String funcionario = cmbFuncionario.getSelectedItem().toString();
+					matriculaFuncionario = Integer.parseInt(funcionario.substring(0, funcionario.indexOf(' ')));
+				}
+
+				ServicosController.getInstance().editarServico(i, kmAtual, matriculaFuncionario,
+						txtDescricao.getText());
+
+				tableModelServicos.setValueAt(cmbFuncionario.getSelectedItem().toString(), i, 4);
+				tableModelServicos.setValueAt(kmAtual, i, 5);
+				tableModelServicos.setValueAt(txtDescricao.getText(), i, 6);
+
+				limparFormularioServico();
+				JOptionPane.showMessageDialog(null, "Ordem de Serviço Salva");
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "KM atual deve ser um número inteiro.");
+			}
+
+		}
 	}
 
-	public void salvarServico() {
+	private void salvarServico() {
 		int i = tableServicos.getSelectedRow();
 		if (i >= 0) {
 			return;
@@ -113,7 +192,6 @@ public class ServicosView extends JFrame {
 				row[4] = cmbFuncionario.getSelectedItem().toString();
 				row[5] = txtKmAtual.getText();
 				row[6] = txtDescricao.getText();
-
 				tableModelServicos.addRow(row);
 
 				limparFormularioServico();
@@ -125,53 +203,209 @@ public class ServicosView extends JFrame {
 		}
 	}
 
-	public void selecionarServico() {
+	private void selecionarServico() {
 		int i = tableServicos.getSelectedRow();
 		if (i >= 0) {
 
-			System.out.print(i);
+			preencheInfoOS();
 
-			Object[] info = ServicosController.getInstance().listarInfoOS(i);
+			String veiculoSelecionado = tableModelServicos.getValueAt(i, 2).toString();
+			int k = 0;
+			for (String veiculo : veiculos) {
+				if (veiculo.equals(veiculoSelecionado)) {
+					cmbVeiculo.setSelectedIndex(k);
+				}
+			}
 
-			System.out.print(info[0]);
+			String funcionarioSelecionado = tableModelServicos.getValueAt(i, 4).toString();
+			k = 0;
+			for (String funcionario : funcionarios) {
+				if (funcionario.equals(funcionarioSelecionado)) {
+					cmbFuncionario.setSelectedIndex(k);
+				}
+			}
 
-			int index = 0;
-			txtNomeCliente.setText(info[index++].toString());
-			txtTelefoneCliente.setText(info[index++].toString());
-			txtEmailCliente.setText(info[index++].toString());
-			txtModelo.setText(info[index++].toString());
-			txtAno.setText(info[index++].toString());
-			txtCor.setText(info[index++].toString());
-			txtPlaca.setText(info[index++].toString());
-			txtValorTotal.setText(info[index++].toString());
-			txtValorDesconto.setText(info[index++].toString());
-			txtValorPecas.setText(info[index++].toString());
-			txtValorServicos.setText(info[index++].toString());
+			txtKmAtual.setText(tableModelServicos.getValueAt(i, 5).toString());
+			txtDescricao.setText(tableModelServicos.getValueAt(i, 6).toString());
+
+			cmbCategoria.setSelectedIndex(-1);
+			cmbItem.setSelectedIndex(-1);
+			txtQuantidadeItem.setText("");
+			txtPrecoItem.setText("");
+
+			preecheTabelaItens();
 		}
 	}
 
+	// --ITENS
 	private void salvarItem() {
+		int i = tableItem.getSelectedRow();
+		if (i >= 0) {
+			return;
+		}
 
+		if (cmbCategoria.getSelectedIndex() == -1 || cmbItem.getSelectedIndex() == -1
+				|| txtQuantidadeItem.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "É necessário preencher os campos Categoria, Item e Quantidade.");
+		} else {
+			try {
+				Item item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
+						cmbItem.getSelectedIndex());
+				if (item == null) {
+					JOptionPane.showMessageDialog(null, "Item não identificado");
+					return;
+				}
+
+				double quantidade = Double.parseDouble(txtQuantidadeItem.getText());
+				int idOS = tableServicos.getSelectedRow();
+
+				double preco = 0;
+				if (!txtPrecoItem.getText().isEmpty()) {
+					preco = Double.parseDouble(txtPrecoItem.getText());
+				} else {
+					preco = item.getPreco() * quantidade;
+				}
+
+				ServicosController.getInstance().salvarItemOS(idOS, item, quantidade, preco);
+
+				Object[] row = new Object[7];
+				row[0] = item.getCodigo();
+				row[1] = item.getTipo().getName();
+				row[2] = item.getDescricao();
+				row[3] = quantidade;
+				row[4] = String.format("%.2f", preco);
+				tableModelItens.addRow(row);
+
+				limparFormularioItem();
+				preencheInfoOS();
+				JOptionPane.showMessageDialog(null, "Item OS Salva");
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "Preço e Quantidade devem ser numéricos.");
+			}
+
+		}
 	}
 
 	private void editarItem() {
+		int i = tableItem.getSelectedRow();
+		if (i >= 0) {
+			try {
+				Item item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
+						cmbItem.getSelectedIndex());
+				if (item == null) {
+					JOptionPane.showMessageDialog(null, "Item não identificado");
+					return;
+				}
 
+				int idOS = tableServicos.getSelectedRow();
+				double quantidade = Double.parseDouble(txtQuantidadeItem.getText());
+				double preco = Double.parseDouble(txtPrecoItem.getText());
+
+				ServicosController.getInstance().editarItemOS(idOS, i, quantidade, preco);
+
+				tableModelItens.setValueAt(item.getCodigo(), i, 0);
+				tableModelItens.setValueAt(item.getTipo().getName(), i, 1);
+				tableModelItens.setValueAt(item.getDescricao(), i, 2);
+				tableModelItens.setValueAt(quantidade, i, 3);
+				tableModelItens.setValueAt(preco, i, 4);
+
+				limparFormularioItem();
+				preencheInfoOS();
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "Preço e Quantidade devem ser numéricos.");
+			}
+
+		}
 	}
 
 	private void removerItem() {
+		int i = tableItem.getSelectedRow();
+		if (i >= 0) {
+			int idOS = tableServicos.getSelectedRow();
 
+			ServicosController.getInstance().removerItemOS(idOS, i);
+			limparFormularioItem();
+			preencheInfoOS();
+		}
 	}
+	
 
 	private void limparFormularioItem() {
-
+		tableItem.clearSelection();
+		cmbCategoria.setSelectedIndex(-1);
+		cmbItem.setSelectedIndex(-1);
+		txtQuantidadeItem.setText("");
+		txtPrecoItem.setText("");
 	}
 
 	private void selecionarItem() {
+		int i = tableItem.getSelectedRow();
+		if (i >= 0) {
+			long codigoItemOS = Long.parseLong(tableModelItens.getValueAt(i, 0).toString());
+			int categoriaId = CategoriaController.getInstance().encontraCategoriaPeloItem(codigoItemOS);
+			cmbCategoria.setSelectedIndex(categoriaId);
+			atualizaCmbItem();
 
+			String itemNome = tableModelItens.getValueAt(i, 2).toString();
+			int index = -1;
+			for (String item : itensCategoria) {
+				index++;
+				if (item.contains(itemNome)) {
+					cmbItem.setSelectedIndex(index);
+				}
+			}
+
+			cmbCategoria.setEditable(false);
+			cmbItem.setEditable(false);
+
+			txtQuantidadeItem.setText(tableModelItens.getValueAt(i, 3).toString());
+			txtPrecoItem.setText(tableModelItens.getValueAt(i, 4).toString());
+		}
 	}
 
+	private void preecheTabelaItens() {
+		int i = tableServicos.getSelectedRow();
+		if (i >= 0) {
+
+			int rows = tableModelItens.getRowCount();
+			for (int k = 0; k < rows; k++) {
+				tableModelItens.removeRow(0);
+			}
+
+			for (ItemOS item : ServicosController.getInstance().listarItensOS(i)) {
+				if (item != null) {
+
+					Object[] row = new Object[5];
+					row[0] = item.getCodigo();
+					row[1] = item.getTipo().getName();
+					row[2] = item.getDescricao();
+					row[3] = item.getQuantidade();
+					row[4] = item.getPreco();
+
+					tableModelItens.addRow(row);
+				}
+			}
+		}
+	}
+
+	// --OUTROS
+// --OUTROS
 	private void voltarMenu() {
 		this.dispose();
+	}
+
+	private void atualizaCmbItem() {
+		int i = cmbCategoria.getSelectedIndex();
+		if (i >= 0) {
+			cmbItem.removeAllItems();
+			itensCategoria = new ArrayList<String>();
+			for (Object[] row : CategoriaController.getInstance().listarItensCategoria(i)) {
+				String str = String.format("%s - %s", row[0], row[2]);
+				itensCategoria.add(str);
+				cmbItem.addItem(str);
+			}
+		}
+
 	}
 
 	private void preenchimentoInicial() {
@@ -180,13 +414,18 @@ public class ServicosView extends JFrame {
 		cmbCategoria = new JComboBox<String>();
 		cmbItem = new JComboBox<String>();
 
+		veiculos = new ArrayList<String>();
+		funcionarios = new ArrayList<String>();
+
 		for (Object[] row : VeiculoController.getInstance().listarVeiculos()) {
 			String str = String.format("%s %s (%s) - %s", row[0], row[2], row[4], row[1]);
+			veiculos.add(str);
 			cmbVeiculo.addItem(str);
 		}
 
 		for (Object[] row : FuncionarioController.getInstance().listarFuncionarios()) {
 			String str = String.format("%s - %s", row[0], row[1]);
+			funcionarios.add(str);
 			cmbFuncionario.addItem(str);
 		}
 
@@ -195,8 +434,7 @@ public class ServicosView extends JFrame {
 		}
 
 		for (Object[] row : CategoriaController.getInstance().listarItensCategoria(0)) {
-			String str = String.format("%s - %s", row[0], row[2]);
-			cmbItem.addItem(str);
+			cmbItem.addItem(String.format("%s - %s", row[0], row[2]));
 		}
 
 		tableModelServicos = new DefaultTableModel();
@@ -204,26 +442,33 @@ public class ServicosView extends JFrame {
 				"KM Atual", "Descri\u00E7\u00E3o" };
 		tableModelServicos.setColumnIdentifiers(columnServicos);
 
+		tableServicos = new JTable();
+		for (Object[] row : ServicosController.getInstance().listarServicos()) {
+			tableModelServicos.addRow(row);
+		}
+		tableServicos.setModel(tableModelServicos);
+
+		tableItem = new JTable();
 		tableModelItens = new DefaultTableModel();
 		Object[] columnItem = { "Código", "Tipo", "Descri\u00E7\u00E3o", "Quantidade", "Preço" };
 		tableModelItens.setColumnIdentifiers(columnItem);
-
-		tableServicos = new JTable();
-		tableServicos.setModel(tableModelServicos);
+		tableItem.setModel(tableModelItens);
 	}
 
-	public ServicosView() {
-		preenchimentoInicial();
-		initialize();
-	}
-
-	public void initialize() {
+	private void initialize() {
 		setTitle("Controle de Cat\u00E1logo");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1035, 675);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+
+		cmbCategoria.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				atualizaCmbItem();
+			}
+		});
 
 		JPanel panelHeader = new JPanel();
 		JPanel panelServicos = new JPanel();
@@ -327,9 +572,6 @@ public class ServicosView extends JFrame {
 		gbc_txtPrecoItem.gridy = 3;
 		panelItemForm.add(txtPrecoItem, gbc_txtPrecoItem);
 		txtPrecoItem.setColumns(10);
-
-		tableItem = new JTable();
-		tableItem.setModel(tableModelItens);
 
 		JScrollPane scrollPaneItem = new JScrollPane();
 
@@ -772,8 +1014,8 @@ public class ServicosView extends JFrame {
 		gbc_btnCancelarServico.gridy = 0;
 		panelServicosButton.add(btnCancelarServico, gbc_btnCancelarServico);
 
-		JButton btnSalvarServico = new JButton("Salvar");
-		btnSalvarServico.addActionListener(new ActionListener() {
+		JButton btnAddServico = new JButton("Adicionar");
+		btnAddServico.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				salvarServico();
 			}
@@ -793,17 +1035,22 @@ public class ServicosView extends JFrame {
 		panelServicosButton.add(btnRemoverServico, gbc_btnRemoverServico);
 
 		JButton btnEditarServico = new JButton("Editar");
+		btnEditarServico.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				editarServico();
+			}
+		});
 		GridBagConstraints gbc_btnEditarServico = new GridBagConstraints();
 		gbc_btnEditarServico.fill = GridBagConstraints.BOTH;
 		gbc_btnEditarServico.insets = new Insets(0, 0, 0, 5);
 		gbc_btnEditarServico.gridx = 2;
 		gbc_btnEditarServico.gridy = 0;
 		panelServicosButton.add(btnEditarServico, gbc_btnEditarServico);
-		GridBagConstraints gbc_btnSalvarServico = new GridBagConstraints();
-		gbc_btnSalvarServico.fill = GridBagConstraints.BOTH;
-		gbc_btnSalvarServico.gridx = 3;
-		gbc_btnSalvarServico.gridy = 0;
-		panelServicosButton.add(btnSalvarServico, gbc_btnSalvarServico);
+		GridBagConstraints gbc_btnAddServico = new GridBagConstraints();
+		gbc_btnAddServico.fill = GridBagConstraints.BOTH;
+		gbc_btnAddServico.gridx = 3;
+		gbc_btnAddServico.gridy = 0;
+		panelServicosButton.add(btnAddServico, gbc_btnAddServico);
 		GridBagLayout gbl_panelServicosTable = new GridBagLayout();
 		gbl_panelServicosTable.columnWidths = new int[] { 0, 0 };
 		gbl_panelServicosTable.rowHeights = new int[] { 0, 0 };
@@ -870,4 +1117,5 @@ public class ServicosView extends JFrame {
 		panelHeader.add(btnVoltar, gbcBtnCancelarCategoria1);
 		contentPane.setLayout(gl_contentPane);
 	}
+
 }
