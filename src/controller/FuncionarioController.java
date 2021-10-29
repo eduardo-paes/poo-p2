@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import model.Cidade;
 import model.Endereco;
 import model.Funcionario;
+import model.interfaces.IFuncionario;
 import persistence.FuncionarioPersistence;
 
 public class FuncionarioController {
@@ -109,8 +110,8 @@ public class FuncionarioController {
 		}
 	}
 
-	public Funcionario encontraFuncionario(int matricula) {
-		for (Funcionario funcionario : funcionarios) {
+	public IFuncionario encontraFuncionario(int matricula) {
+		for (IFuncionario funcionario : funcionarios) {
 			if (funcionario.getMatricula() == matricula) {
 				return funcionario;
 			}

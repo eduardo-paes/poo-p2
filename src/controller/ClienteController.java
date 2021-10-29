@@ -7,6 +7,7 @@ import java.util.Map;
 import model.Cidade;
 import model.Cliente;
 import model.Endereco;
+import model.interfaces.ICliente;
 import persistence.ClientePersistence;
 
 public class ClienteController {
@@ -18,7 +19,7 @@ public class ClienteController {
 		clientePersistence = new ClientePersistence();
 		clientes = clientePersistence.extraiDadosArquivo();
 	}
-	
+
 	public static ClienteController getInstance() {
 		if (instance == null)
 			instance = new ClienteController();
@@ -122,14 +123,14 @@ public class ClienteController {
 		}
 	}
 
-	public Cliente encontraCliente(long cpf) {
+	public ICliente encontraCliente(long cpf) {
 		if (cpf >= 0) {
-			for (Cliente cliente : clientes) {
+			for (ICliente cliente : clientes) {
 				if (cliente.getCpf() == cpf) {
 					return cliente;
 				}
 			}
-		}	
+		}
 		return null;
 	}
 }

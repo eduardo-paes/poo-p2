@@ -35,7 +35,7 @@ public class ItemController {
 		return tipos;
 	}
 	
-	public Item encontrarItem(long codigo) {
+	private Item encontrarItem(long codigo) {
 		Item item = null;
 		for (Item i : itens) {
 			System.out.println(i.getCodigo());

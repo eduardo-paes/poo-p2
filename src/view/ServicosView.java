@@ -34,7 +34,6 @@ import controller.CategoriaController;
 import controller.FuncionarioController;
 import controller.ServicosController;
 import controller.VeiculoController;
-import model.ItemOS;
 import model.interfaces.IItem;
 
 public class ServicosView extends JFrame {
@@ -371,24 +370,13 @@ public class ServicosView extends JFrame {
 				tableModelItens.removeRow(0);
 			}
 
-			for (ItemOS item : ServicosController.getInstance().listarItensOS(i)) {
-				if (item != null) {
-
-					Object[] row = new Object[5];
-					row[0] = item.getCodigo();
-					row[1] = item.getTipo().getName();
-					row[2] = item.getDescricao();
-					row[3] = item.getQuantidade();
-					row[4] = item.getPreco();
-
-					tableModelItens.addRow(row);
-				}
+			for (Object[] row : ServicosController.getInstance().listarItensOS(i)) {
+				tableModelItens.addRow(row);
 			}
 		}
 	}
 
 	// --OUTROS
-// --OUTROS
 	private void voltarMenu() {
 		this.dispose();
 	}

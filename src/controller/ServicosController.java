@@ -3,11 +3,11 @@ package controller;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import model.Funcionario;
 import model.ItemOS;
 import model.OrdemServico;
-import model.Veiculo;
+import model.interfaces.IFuncionario;
 import model.interfaces.IItem;
+import model.interfaces.IVeiculo;
 import persistence.ServicosPersistence;
 
 public class ServicosController {
@@ -29,14 +29,14 @@ public class ServicosController {
 	public int salvarServico(String chassi, int kmAtual, int matriculaFuncionario, String descricao) {
 
 		if (!chassi.isEmpty()) {
-			Veiculo veiculo = VeiculoController.getInstance().encontraVeiculo(chassi);
+			IVeiculo veiculo = VeiculoController.getInstance().encontraVeiculo(chassi);
 
 			if (veiculo != null) {
 				OrdemServico os = new OrdemServico(veiculo, kmAtual);
 				os.setDescricao(descricao);
 
 				if (matriculaFuncionario != 0) {
-					Funcionario funcionario = FuncionarioController.getInstance()
+					IFuncionario funcionario = FuncionarioController.getInstance()
 							.encontraFuncionario(matriculaFuncionario);
 					os.setConsultor(funcionario);
 				}
@@ -57,7 +57,8 @@ public class ServicosController {
 			os.setDescricao(descricao);
 
 			if (matriculaFuncionario != 0) {
-				Funcionario funcionario = FuncionarioController.getInstance().encontraFuncionario(matriculaFuncionario);
+				IFuncionario funcionario = FuncionarioController.getInstance()
+						.encontraFuncionario(matriculaFuncionario);
 				os.setConsultor(funcionario);
 			}
 
@@ -67,10 +68,12 @@ public class ServicosController {
 
 	public void removerServico(int index) {
 		if (index >= 0 && servicos.size() >= index) {
+			OrdemServico os = servicos.get(index);
+			for (int i = 0; i < servicos.get(index).listarItensOS().size(); i++) {
+				os.removeItem(i);
+			}
+
 			servicos.remove(index);
-
-			// TODO: Remover itemOS
-
 			servicosPersistence.salvaDadosArquivo(servicos);
 		}
 	}
@@ -111,18 +114,60 @@ public class ServicosController {
 		return rows;
 	}
 
-	public ArrayList<ItemOS> listarItensOS(int osId) {
+	public ArrayList<Object[]> listarItensOS(int osId) {
+		ArrayList<Object[]> rows = new ArrayList<Object[]>();
 		if (osId >= 0) {
-			// TODO: Ajustar retorno
-			return servicos.get(osId).listarItensOS();
+			for (ItemOS item : servicos.get(osId).listarItensOS()) {
+				if (item != null) {
+
+					Object[] row = new Object[5];
+					row[0] = item.getCodigo();
+					row[1] = item.getTipo().getName();
+					row[2] = item.getDescricao();
+					row[3] = item.getQuantidade();
+					row[4] = item.getPreco();
+					rows.add(row);
+				}
+			}
 		}
-		return null;
+		return rows;
 	}
 
 	public Object[] listarInfoOS(int index) {
 		OrdemServico os = servicos.get(index);
 		if (os != null) {
-			return os.listarOS();
+
+			double valorServicos = os.getTotalServicos(), valorPecas = os.getTotalPecas(), desconto = 0;
+			double valorTotal = valorPecas + valorServicos;
+			Object[] row = new Object[11];
+
+			String nomeCliente = "", emailCliente = "";
+			long telefoneCliente = 0;
+
+			if (os.getCliente() != null) {
+				nomeCliente = os.getCliente().getNome();
+				telefoneCliente = os.getCliente().getTelefone();
+				emailCliente = os.getCliente().getEmail();
+
+				if (os.getCliente().isPlatinum()) {
+					desconto = valorServicos;
+					valorTotal = valorPecas;
+				}
+			}
+
+			row[0] = nomeCliente;
+			row[1] = telefoneCliente;
+			row[2] = emailCliente;
+			row[3] = os.getVeiculo().getModelo().getNome();
+			row[4] = os.getVeiculo().getAno();
+			row[5] = os.getVeiculo().getCor();
+			row[6] = os.getVeiculo().getPlaca();
+			row[7] = String.format("%.2f", valorServicos);
+			row[8] = String.format("%.2f", valorPecas);
+			row[9] = String.format("%.2f", desconto);
+			row[10] = String.format("%.2f", valorTotal);
+
+			return row;
 		}
 		return null;
 	}

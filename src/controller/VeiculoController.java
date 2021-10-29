@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import model.Modelo;
 import model.Veiculo;
+import model.interfaces.IVeiculo;
 import persistence.VeiculoPersistence;
 
 public class VeiculoController {
@@ -84,19 +85,18 @@ public class VeiculoController {
 			persistence.salvaDadosArquivo(veiculos);
 		}
 	}
-	
-	public Veiculo encontraVeiculo(String chassi) {
-		for (Veiculo veiculo : veiculos) {
+
+	public IVeiculo encontraVeiculo(String chassi) {
+		for (IVeiculo veiculo : veiculos) {
 			if (veiculo.getChassi().equals(chassi)) {
 				return veiculo;
 			}
 		}
 		return null;
 	}
-	
-	public String encontraProprietario(String chassi)
-	{
-		Veiculo veiculo = encontraVeiculo(chassi);
+
+	public String encontraProprietario(String chassi) {
+		IVeiculo veiculo = encontraVeiculo(chassi);
 		if (veiculo != null && veiculo.getProprietario() != null) {
 			return veiculo.getProprietario().getNome();
 		}

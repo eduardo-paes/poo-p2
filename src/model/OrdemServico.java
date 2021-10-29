@@ -120,40 +120,6 @@ public class OrdemServico implements Serializable {
 		return itens;
 	}
 
-	public Object[] listarOS() {
-		double valorServicos = this.getTotalServicos(), valorPecas = this.getTotalPecas(), desconto = 0;
-		double valorTotal = valorPecas + valorServicos;
-		Object[] row = new Object[11];
-
-		String nomeCliente = "", emailCliente = "";
-		long telefoneCliente = 0;
-
-		if (cliente != null) {
-			nomeCliente = cliente.getNome();
-			telefoneCliente = cliente.getTelefone();
-			emailCliente = cliente.getEmail();
-
-			if (cliente.isPlatinum()) {
-				desconto = valorServicos;
-				valorTotal = valorPecas;
-			}
-		}
-
-		row[0] = nomeCliente;
-		row[1] = telefoneCliente;
-		row[2] = emailCliente;
-		row[3] = veiculo.getModelo().getNome();
-		row[4] = veiculo.getAno();
-		row[5] = veiculo.getCor();
-		row[6] = veiculo.getPlaca();
-		row[7] = String.format("%.2f", valorServicos);
-		row[8] = String.format("%.2f", valorPecas);
-		row[9] = String.format("%.2f", desconto);
-		row[10] = String.format("%.2f", valorTotal);
-
-		return row;
-	}
-
 	@SuppressWarnings("deprecation")
 	private void writeObject(ObjectOutputStream obj) throws IOException {
 		obj.defaultWriteObject();
