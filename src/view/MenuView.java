@@ -23,6 +23,7 @@ public class MenuView extends JFrame {
 	private JPanel contentPane;
 	
 	public MenuView() {
+		setTitle("Menu Inicial");
 		initialize();
 	}
 

@@ -609,7 +609,7 @@ public class CatalogoView extends JFrame {
 		gbl_panelHeader.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
 		panelHeader.setLayout(gbl_panelHeader);
 
-		JLabel lblHeader = new JLabel("Controle de Funcion\u00E1rios");
+		JLabel lblHeader = new JLabel("Controle de Cat\u00E1logo");
 		lblHeader.setFont(new Font("Calibri", Font.BOLD, 24));
 		GridBagConstraints gbc_lblHeader = new GridBagConstraints();
 		gbc_lblHeader.insets = new Insets(0, 0, 0, 5);
