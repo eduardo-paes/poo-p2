@@ -4,10 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import model.Funcionario;
-import model.Item;
 import model.ItemOS;
 import model.OrdemServico;
 import model.Veiculo;
+import model.interfaces.IItem;
 import persistence.ServicosPersistence;
 
 public class ServicosController {
@@ -53,12 +53,11 @@ public class ServicosController {
 	public void editarServico(int categoriaId, int kmAtual, int matriculaFuncionario, String descricao) {
 		if (categoriaId >= 0 && servicos.size() >= categoriaId) {
 			OrdemServico os = servicos.get(categoriaId);
-			
+
 			os.setDescricao(descricao);
 
 			if (matriculaFuncionario != 0) {
-				Funcionario funcionario = FuncionarioController.getInstance()
-						.encontraFuncionario(matriculaFuncionario);
+				Funcionario funcionario = FuncionarioController.getInstance().encontraFuncionario(matriculaFuncionario);
 				os.setConsultor(funcionario);
 			}
 
@@ -114,8 +113,7 @@ public class ServicosController {
 
 	public ArrayList<ItemOS> listarItensOS(int osId) {
 		if (osId >= 0) {
-			System.out.println(servicos.get(osId).listarItensOS());
-
+			// TODO: Ajustar retorno
 			return servicos.get(osId).listarItensOS();
 		}
 		return null;
@@ -129,7 +127,7 @@ public class ServicosController {
 		return null;
 	}
 
-	public void salvarItemOS(int osId, Item  item, double quantidade, double preco) {
+	public void salvarItemOS(int osId, IItem item, double quantidade, double preco) {
 		if (osId >= 0 && servicos.size() >= osId) {
 			OrdemServico os = servicos.get(osId);
 			if (preco != 0) {
@@ -145,7 +143,7 @@ public class ServicosController {
 		if (osId >= 0 && servicos.size() >= osId) {
 			OrdemServico os = servicos.get(osId);
 			ItemOS itemOS = os.listarItensOS().get(itemId);
-			
+
 			if (itemOS != null) {
 				itemOS.setPreco(preco);
 				if (preco != 0) {
@@ -155,7 +153,7 @@ public class ServicosController {
 				}
 				servicosPersistence.salvaDadosArquivo(servicos);
 			}
-			
+
 		}
 	}
 
@@ -166,5 +164,5 @@ public class ServicosController {
 			servicosPersistence.salvaDadosArquivo(servicos);
 		}
 	}
-	
+
 }

@@ -1,5 +1,8 @@
 package model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import model.enums.ETipoItem;
@@ -45,6 +48,17 @@ public class Item implements IItem, Serializable {
 	@Override
 	public double getPreco() {
 		return preco;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void writeObject(ObjectOutputStream obj) throws IOException {
+		obj.defaultWriteObject();
+		obj.writeObject(new Long(contadorCodigo));
+	}
+
+	private void readObject(ObjectInputStream obj) throws ClassNotFoundException, IOException {
+		obj.defaultReadObject();
+		contadorCodigo = (Long) obj.readObject();
 	}
 
 }

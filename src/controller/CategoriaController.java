@@ -92,9 +92,9 @@ public class CategoriaController {
 		return rows;
 	}
 
-	public Item encontraCategoriaItem(int categoriaId, int itemId) {
+	public IItem encontraCategoriaItem(int categoriaId, int itemId) {
 		if (categoriaId >= 0 && itemId >= 0) {
-			return (Item)categorias.get(categoriaId).listarItens().get(itemId);
+			return categorias.get(categoriaId).listarItens().get(itemId);
 		}
 		return null;
 	}

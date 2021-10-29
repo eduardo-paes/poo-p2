@@ -1,5 +1,8 @@
 package model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -112,8 +115,8 @@ public class OrdemServico implements Serializable {
 	public double getTotalOS() {
 		return getTotalServicos() + getTotalPecas();
 	}
-	
-	public ArrayList<ItemOS> listarItensOS(){
+
+	public ArrayList<ItemOS> listarItensOS() {
 		return itens;
 	}
 
@@ -124,12 +127,12 @@ public class OrdemServico implements Serializable {
 
 		String nomeCliente = "", emailCliente = "";
 		long telefoneCliente = 0;
-		
+
 		if (cliente != null) {
 			nomeCliente = cliente.getNome();
 			telefoneCliente = cliente.getTelefone();
 			emailCliente = cliente.getEmail();
-			
+
 			if (cliente.isPlatinum()) {
 				desconto = valorServicos;
 				valorTotal = valorPecas;
@@ -149,6 +152,17 @@ public class OrdemServico implements Serializable {
 		row[10] = String.format("%.2f", valorTotal);
 
 		return row;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void writeObject(ObjectOutputStream obj) throws IOException {
+		obj.defaultWriteObject();
+		obj.writeObject(new Integer(contadorNumero));
+	}
+
+	private void readObject(ObjectInputStream obj) throws ClassNotFoundException, IOException {
+		obj.defaultReadObject();
+		contadorNumero = (Integer) obj.readObject();
 	}
 
 }

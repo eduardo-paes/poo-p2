@@ -34,8 +34,8 @@ import controller.CategoriaController;
 import controller.FuncionarioController;
 import controller.ServicosController;
 import controller.VeiculoController;
-import model.Item;
 import model.ItemOS;
+import model.interfaces.IItem;
 
 public class ServicosView extends JFrame {
 
@@ -249,7 +249,7 @@ public class ServicosView extends JFrame {
 			JOptionPane.showMessageDialog(null, "É necessário preencher os campos Categoria, Item e Quantidade.");
 		} else {
 			try {
-				Item item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
+				IItem item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
 						cmbItem.getSelectedIndex());
 				if (item == null) {
 					JOptionPane.showMessageDialog(null, "Item não identificado");
@@ -290,7 +290,7 @@ public class ServicosView extends JFrame {
 		int i = tableItem.getSelectedRow();
 		if (i >= 0) {
 			try {
-				Item item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
+				IItem item = CategoriaController.getInstance().encontraCategoriaItem(cmbCategoria.getSelectedIndex(),
 						cmbItem.getSelectedIndex());
 				if (item == null) {
 					JOptionPane.showMessageDialog(null, "Item não identificado");
@@ -328,7 +328,6 @@ public class ServicosView extends JFrame {
 			preencheInfoOS();
 		}
 	}
-	
 
 	private void limparFormularioItem() {
 		tableItem.clearSelection();

@@ -35,8 +35,6 @@ public class CidadeController {
 	public Cidade encontrarCidade(String nomeCidade, String uf) {
 		Cidade cidade = null;
 		for (Cidade c : cidades) {
-			System.out.println(nomeCidade);
-			System.out.println(uf);
 			if (c.getNome().contains(nomeCidade) && c.getUf().contains(uf)) {
 				cidade = c;
 				break;

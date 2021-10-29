@@ -1,5 +1,9 @@
 package model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import model.interfaces.IFuncionario;
 
 public class Funcionario extends Pessoa implements IFuncionario {
@@ -16,6 +20,17 @@ public class Funcionario extends Pessoa implements IFuncionario {
 	@Override
 	public int getMatricula() {
 		return matricula;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void writeObject(ObjectOutputStream obj) throws IOException {
+		obj.defaultWriteObject();
+		obj.writeObject(new Integer(contadorMatricula));
+	}
+
+	private void readObject(ObjectInputStream obj) throws ClassNotFoundException, IOException {
+		obj.defaultReadObject();
+		contadorMatricula = (Integer) obj.readObject();
 	}
 
 }

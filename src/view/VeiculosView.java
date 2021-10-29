@@ -45,6 +45,11 @@ public class VeiculosView extends JFrame {
 	private JTextField txtPlaca;
 	private JTextField txtAno;
 	private JComboBox<String> cmbProprietario;
+	
+	public VeiculosView() {
+		preenchimentoInicial();		
+		initialize();
+	}
 
 	private void salvarModelo() {
 		int i = tableVeiculo.getSelectedRow();
@@ -169,10 +174,11 @@ public class VeiculosView extends JFrame {
 			tableModel.addRow(row);
 		}
 
+		tableVeiculo = new JTable();
 		tableVeiculo.setModel(tableModel);
 	}
-
-	public VeiculosView() {
+	
+	private void initialize() {
 		setTitle("Controle de Ve\u00EDculos");
 		// INICIALIZACAO
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -241,7 +247,7 @@ public class VeiculosView extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		panelBody.add(scrollPane, gbc_scrollPane);
 
-		tableVeiculo = new JTable();
+		
 		tableVeiculo.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -249,8 +255,7 @@ public class VeiculosView extends JFrame {
 			}
 		});
 		tableVeiculo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		scrollPane.setViewportView(tableVeiculo);
-		preenchimentoInicial();
+		scrollPane.setViewportView(tableVeiculo);		
 
 		JPanel panel = new JPanel();
 		GridBagConstraints gbc_panel = new GridBagConstraints();
@@ -425,6 +430,6 @@ public class VeiculosView extends JFrame {
 		gbc_btnEditar.gridx = 1;
 		gbc_btnEditar.gridy = 9;
 		panel.add(btnEditar, gbc_btnEditar);
-
 	}
+	
 }
